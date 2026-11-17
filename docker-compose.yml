@@ -77,7 +77,7 @@ services:
     depends_on:
       - api
     ports:
-      - "80:80"
+      - "${WEB_PORT:-8081}:80"
     networks: [atoms]
 
 volumes:

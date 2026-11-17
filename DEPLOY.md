@@ -71,7 +71,28 @@ curl http://127.0.0.1/actuator/health
 curl http://127.0.0.1/api/system/provider
 ```
 
-浏览器打开 `http://<你的公网IP>`，应看到创作工作台首页。可以：保存草稿 → 项目页 → 生成（若模型密钥已配且已开通）。
+浏览器打开 `http://<你的公网IP>:${WEB_PORT}`（默认 8081），应看到创作工作台首页。可以：保存草稿 → 项目页 → 生成（若模型密钥已配且已开通）。
+
+## 在宝塔（腾讯云）上部署
+
+如果你用的是宝塔面板（如 `http://<IP>:8888`），Docker 部署走「终端」最直接——宝塔的 Docker 图形界面管理镜像/容器方便，但跑 `docker compose` 编排还是命令行可靠：
+
+1. **上传代码**：宝塔「文件」里把项目传到服务器某个目录（如 `/www/wwwroot/myAtoms`），或在宝塔「终端」里 `git clone https://github.com/tongjc123/myAtoms.git`。
+2. **确认端口不冲突**：本机旧项目已占用 80 和 8080，所以 `.env.docker` 里 `WEB_PORT` 已默认改为 **8081**（若 8081 也被占，改成 8082 等）。80 上的 PowerHub 不受影响。
+3. **开放安全组端口**：在腾讯云控制台「安全组」放行 `WEB_PORT`（8081）入站规则，否则外网访问不到。
+4. **终端里执行**（宝塔左侧「终端」，或 SSH）：
+
+```bash
+cd /www/wwwroot/myAtoms
+cp .env.docker.example .env.docker
+vi .env.docker        # 填 MySQL 密码、ATOMS_ALLOWED_ORIGINS=http://1.14.73.119:8081、模型密钥
+docker compose --env-file .env.docker up -d --build
+```
+
+5. **验证**：`docker compose ps` 三容器 healthy；浏览器开 `http://1.14.73.119:8081`。
+
+> 注意：宝塔面板本身占 8888，本机旧项目占 80/8080，MySQL 若宝塔已装了本地 MySQL 服务（占 3306），本 compose 的 mysql 容器用容器内 3306、不映射到宿主机，所以不会和宝塔自带的 MySQL 冲突。但若宿主机已有 3306 占用而你想映射出来，需要改端口——本方案默认**不映射** mysql 端口，只有容器内部互通，最安全。
+
 
 ### 5. 查看日志 / 停止
 
