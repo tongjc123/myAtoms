@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="霓虹方块封面">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0716"/><stop offset="1" stop-color="#1a0d2e"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.62" cy="0.45" r="0.5">
+      <stop offset="0" stop-color="#7b5bff" stop-opacity="0.35"/><stop offset="1" stop-color="#0b0716" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#b6a2ff"/><stop offset="1" stop-color="#ff8ee0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#halo)"/>
+  <g transform="translate(590 110)">
+    <rect x="0" y="0" width="480" height="480" rx="28" fill="#1b1130" opacity="0.92" stroke="#7b5bff" stroke-opacity="0.3"/>
+    <g font-family="PingFang SC, Microsoft YaHei, sans-serif" font-weight="700" text-anchor="middle">
+      <rect x="24" y="24" width="100" height="100" rx="16" fill="#2b2440"/><text x="74" y="86" font-size="46" fill="#cfc4ff">2</text>
+      <rect x="136" y="24" width="100" height="100" rx="16" fill="#3f3170"/><text x="186" y="86" font-size="46" fill="#ffffff">8</text>
+      <rect x="248" y="24" width="100" height="100" rx="16" fill="#8a3fb0"/><text x="298" y="86" font-size="44" fill="#ffffff">32</text>
+      <rect x="360" y="24" width="100" height="100" rx="16" fill="#ff5fa2"/><text x="410" y="86" font-size="38" fill="#2b0620">128</text>
+      <rect x="24" y="136" width="100" height="100" rx="16" fill="#352a52"/><text x="74" y="198" font-size="46" fill="#d9ccff">4</text>
+      <rect x="136" y="136" width="100" height="100" rx="16" fill="#5b3a92"/><text x="186" y="198" font-size="46" fill="#ffffff">16</text>
+      <rect x="248" y="136" width="100" height="100" rx="16" fill="#c246a8"/><text x="298" y="198" font-size="44" fill="#ffffff">64</text>
+      <rect x="360" y="136" width="100" height="100" rx="16" fill="#7ce7c5"/><text x="410" y="198" font-size="38" fill="#04231b">1024</text>
+      <rect x="24" y="248" width="100" height="100" rx="16" fill="#1b1130" opacity="0.6"/>
+      <rect x="136" y="248" width="100" height="100" rx="16" fill="#ffc95f"/><text x="186" y="310" font-size="40" fill="#2b1c02">512</text>
+      <rect x="248" y="248" width="100" height="100" rx="16" fill="#1b1130" opacity="0.6"/>
+      <rect x="360" y="248" width="100" height="100" rx="16" fill="#5fe0ff"/><text x="410" y="311" font-size="34" fill="#04202b">2048</text>
+      <rect x="24" y="360" width="100" height="100" rx="16" fill="#1b1130" opacity="0.6"/>
+      <rect x="136" y="360" width="100" height="100" rx="16" fill="#1b1130" opacity="0.6"/>
+      <rect x="248" y="360" width="100" height="100" rx="16" fill="#2b2440"/>
+      <rect x="360" y="360" width="100" height="100" rx="16" fill="#1b1130" opacity="0.6"/>
+    </g>
+  </g>
+  <g transform="translate(64 540)">
+    <text font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="72" font-weight="800" fill="url(#title)" letter-spacing="6">霓虹方块</text>
+    <text y="44" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" fill="#a789e0" letter-spacing="10">NEON 2048</text>
+  </g>
+</svg>

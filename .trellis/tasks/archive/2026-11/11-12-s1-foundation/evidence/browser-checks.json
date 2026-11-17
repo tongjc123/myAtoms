@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-12",
+  "checks": [
+    {
+      "name": "desktop viewport",
+      "passed": true
+    },
+    {
+      "name": "desktop no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "connected capability state",
+      "passed": true
+    },
+    {
+      "name": "generation disabled",
+      "passed": true
+    },
+    {
+      "name": "select 游戏",
+      "passed": true
+    },
+    {
+      "name": "select 幻灯片",
+      "passed": true
+    },
+    {
+      "name": "select 视频",
+      "passed": true
+    },
+    {
+      "name": "select 网页",
+      "passed": true
+    },
+    {
+      "name": "phone viewport",
+      "passed": true
+    },
+    {
+      "name": "phone no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "phone navigation opens",
+      "passed": true
+    },
+    {
+      "name": "drawer initial focus",
+      "passed": true
+    },
+    {
+      "name": "drawer tab stays inside",
+      "passed": true
+    },
+    {
+      "name": "escape closes and restores focus",
+      "passed": true
+    },
+    {
+      "name": "desktop resize releases drawer",
+      "passed": true
+    },
+    {
+      "name": "project navigation closes drawer",
+      "passed": true
+    },
+    {
+      "name": "project state truthful",
+      "passed": true
+    },
+    {
+      "name": "network failure has Chinese retry state",
+      "passed": true
+    },
+    {
+      "name": "network retry recovers",
+      "passed": true
+    },
+    {
+      "name": "invalid response fails closed",
+      "passed": true
+    },
+    {
+      "name": "invalid response retry recovers",
+      "passed": true
+    }
+  ],
+  "runtimeErrors": [],
+  "abortedInterceptions": 1,
+  "limitation": "Foundation only; no generation, persistence, publishing or paid provider acceptance."
+}

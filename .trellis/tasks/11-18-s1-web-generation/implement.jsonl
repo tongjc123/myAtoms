@@ -1,0 +1,5 @@
+{"file":".trellis/spec/project-contract.md","reason":"真实内容或明确失败；不得用模板结果冒充模型生成"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/web/WebGenerator.java","reason":"两轮 Ark chat 调用与页面清洗入口"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/web/WebHtml.java","reason":"单文件/无外链/体积校验，决定什么能入库"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/run/RunService.java","reason":"executeWeb 五步流水线与 artifact 事件"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/WebRunApiTest.java","reason":"成功/外链拒绝/模型未开通三条路径的回归"}

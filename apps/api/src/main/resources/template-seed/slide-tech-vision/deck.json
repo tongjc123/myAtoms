@@ -1,0 +1,79 @@
+{
+  "title": "把智能体变成基础设施",
+  "theme": "ink",
+  "brand": { "name": "Platform Vision 2027" },
+  "slides": [
+    {
+      "layout": "cover",
+      "kicker": "TECH VISION 2027",
+      "title": "把智能体变成基础设施",
+      "subtitle": "产品与平台演进的三条主线",
+      "meta": ["2026.11", "平台团队"]
+    },
+    {
+      "layout": "agenda",
+      "kicker": "CONTENTS",
+      "title": "三条主线",
+      "items": ["从工具到同事", "统一运行时", "数据与权限", "开放生态"]
+    },
+    {
+      "layout": "statement",
+      "text": "模型会继续变强，但真正的壁垒，是把能力接进业务流程的那一层。"
+    },
+    {
+      "layout": "bullets",
+      "kicker": "01",
+      "title": "从工具到同事",
+      "bullets": [
+        "智能体从「被调用」转向「主动承担任务」",
+        "人类只保留目标设定与验收，过程可回看",
+        "每一个任务都能被暂停、重放与审计"
+      ]
+    },
+    {
+      "layout": "stats",
+      "kicker": "TARGETS",
+      "title": "一年内的三个数字",
+      "stats": [
+        { "value": "3 条", "label": "平台主线", "note": "运行时 / 数据 / 生态" },
+        { "value": "12 个月", "label": "完成运行时统一", "note": "分四个季度推进" },
+        { "value": "99.95%", "label": "可用性目标", "note": "任务级可恢复" }
+      ]
+    },
+    {
+      "layout": "bullets",
+      "kicker": "02",
+      "title": "统一运行时",
+      "bullets": [
+        "任务、租约、预算与产物收敛到同一套原语",
+        "任何一次生成都可以暂停、恢复与回滚",
+        "运行日志就是产品的一部分，不是调试附属品"
+      ]
+    },
+    {
+      "layout": "bullets",
+      "kicker": "03",
+      "title": "数据与权限",
+      "bullets": [
+        "项目数据按访客隔离，跨项目不复用",
+        "生成产物只在版本链上流转，不覆盖历史",
+        "对外分享走短期令牌，不暴露账号凭证"
+      ]
+    },
+    {
+      "layout": "bullets",
+      "kicker": "04",
+      "title": "开放生态",
+      "bullets": [
+        "对外开放运行时 API 与事件流",
+        "第三方可以贡献能力包与行业模板",
+        "收入按调用量与模板使用分成"
+      ]
+    },
+    {
+      "layout": "closing",
+      "title": "下一步",
+      "subtitle": "Q1 完成运行时统一，Q2 开放首批能力包"
+    }
+  ]
+}

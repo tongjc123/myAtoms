@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-16T09:43:20.350Z",
+  "mode": "real UI/API/MySQL; local slides only; no paid calls",
+  "passed": 11,
+  "checks": [
+    "two persisted versions appear in the real project history",
+    "historical preview reads exact old content without moving the current version",
+    "restore waits for explicit confirmation",
+    "confirmed restore creates v3 with correct provenance and byte-identical content",
+    "a stale second page cannot overwrite the restored version",
+    "restored history survives refresh",
+    "history controls fit phone width",
+    "WEB source ZIP downloads through the real UI",
+    "GAME source ZIP downloads through the real UI",
+    "a draft shows an honest empty history",
+    "no uncaught browser exceptions"
+  ]
+}

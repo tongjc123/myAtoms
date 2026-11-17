@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/11-16-s1-project-generation/prd.md","reason":"Acceptance"}
+{"file":".trellis/tasks/11-16-s1-project-generation/design.md","reason":"Cross-layer contract"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Transactions permissions and tests"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Build and actual UI behavior"}

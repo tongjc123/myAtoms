@@ -1,0 +1,87 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env.docker}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-atoms_demo}
+      MYSQL_USER: ${MYSQL_USER:-atoms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env.docker}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks: [atoms]
+
+  api:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8080"
+      ATOMS_DB_URL: ${ATOMS_DB_URL}
+      ATOMS_DB_USER: ${MYSQL_USER:-atoms}
+      ATOMS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      ATOMS_ALLOWED_ORIGINS: ${ATOMS_ALLOWED_ORIGINS}
+      ATOMS_COOKIE_SECURE: ${ATOMS_COOKIE_SECURE:-false}
+      ATOMS_PREVIEW_TTL: ${ATOMS_PREVIEW_TTL:-PT30M}
+      # Volcengine Ark (video)
+      ATOMS_ARK_API_KEY: ${ATOMS_ARK_API_KEY:-}
+      ATOMS_ARK_BASE_URL: ${ATOMS_ARK_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
+      ATOMS_ARK_VIDEO_MODEL: ${ATOMS_ARK_VIDEO_MODEL:-}
+      ATOMS_ARK_VIDEO_MODEL_25: ${ATOMS_ARK_VIDEO_MODEL_25:-}
+      ATOMS_ARK_VIDEO_MODEL_WAN: ${ATOMS_ARK_VIDEO_MODEL_WAN:-}
+      ATOMS_ARK_VIDEO_TIMEOUT: ${ATOMS_ARK_VIDEO_TIMEOUT:-10m}
+      ATOMS_ARK_POLL_INTERVAL: ${ATOMS_ARK_POLL_INTERVAL:-3s}
+      ATOMS_ARK_ALLOW_PRIVATE_MEDIA: ${ATOMS_ARK_ALLOW_PRIVATE_MEDIA:-false}
+      ATOMS_VIDEO_DURATION: ${ATOMS_VIDEO_DURATION:-5}
+      ATOMS_VIDEO_RESOLUTION: ${ATOMS_VIDEO_RESOLUTION:-720p}
+      ATOMS_VIDEO_RATIO: ${ATOMS_VIDEO_RATIO:-16:9}
+      ATOMS_VIDEO_AUDIO: ${ATOMS_VIDEO_AUDIO:-false}
+      # Qianwen (text + image)
+      ATOMS_QWEN_API_KEY: ${ATOMS_QWEN_API_KEY:-}
+      ATOMS_QWEN_BASE_URL: ${ATOMS_QWEN_BASE_URL:-https://cn-beijing.maas.qianwenaiapi.com/api/v1}
+      ATOMS_QWEN_TEXT_MODEL: ${ATOMS_QWEN_TEXT_MODEL:-}
+      ATOMS_QWEN_TEXT_MODEL_NAME: ${ATOMS_QWEN_TEXT_MODEL_NAME:-}
+      ATOMS_QWEN_IMAGE_MODEL: ${ATOMS_QWEN_IMAGE_MODEL:-}
+      ATOMS_QWEN_ALLOW_PRIVATE_MEDIA: ${ATOMS_QWEN_ALLOW_PRIVATE_MEDIA:-false}
+      # Budget
+      ATOMS_BUDGET_LIMIT_CNY: ${ATOMS_BUDGET_LIMIT_CNY:-300.00}
+      ATOMS_VIDEO_RESERVE_CNY: ${ATOMS_VIDEO_RESERVE_CNY:-6.00}
+      ATOMS_TEXT_RESERVE_CNY: ${ATOMS_TEXT_RESERVE_CNY:-1.00}
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks: [atoms]
+
+  web:
+    build:
+      context: ./apps/web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    networks: [atoms]
+
+volumes:
+  mysql_data:
+
+networks:
+  atoms:

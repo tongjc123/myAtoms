@@ -1,0 +1,5 @@
+{"file":".trellis/spec/project-contract.md","reason":"Scope and immutable version invariants"}
+{"file":".trellis/spec/backend/index.md","reason":"Backend guidelines and quality"}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend guidelines and quality"}
+{"file":".trellis/spec/backend/project-generation-contract.md","reason":"Shared lock and generation base invariants"}
+{"file":".trellis/spec/backend/version-history-contract.md","reason":"History restore/export executable contract"}

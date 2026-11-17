@@ -1,0 +1,12 @@
+{
+  "slug": "slide-portfolio-minimal",
+  "name": "极简作品集",
+  "type": "SLIDES",
+  "category": "作品集",
+  "summary": "米白纸感的个人作品集，留白克制、文字主导",
+  "description": "适合设计师、摄影师与独立创作者的作品集模板：以章节分隔作品方向，用大字与留白建立节奏，单页只讲一件事。替换文案即可用于投稿或提案。",
+  "author": "Atoms Demo 自研示例",
+  "sortOrder": 12,
+  "engine": "slide-deck",
+  "files": ["deck.json"]
+}

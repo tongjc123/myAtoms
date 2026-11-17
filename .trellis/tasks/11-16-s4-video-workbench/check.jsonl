@@ -1,0 +1,5 @@
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/VideoRunApiTest.java","reason":"R24/R25/R13 evidence against a local provider stub: success, media ranges, cancel, validation"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/VideoBudgetApiTest.java","reason":"R26 evidence: exhausted budget fails the run before any paid call"}
+{"file":".cache/video-check.mjs","reason":"Headless walkthrough: hero, model menu, spec menu, example prompt, chat steps, terminal state"}
+{"file":".trellis/tasks/11-16-s4-video-workbench/evidence/08-terminal.png","reason":"Real provider: honest PROVIDER_MODEL_NOT_ACTIVATED failure"}
+{"file":".trellis/tasks/11-16-s4-video-workbench/evidence/09-succeeded.png","reason":"Stub provider: artifact card and playing video preview"}

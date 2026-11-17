@@ -1,0 +1,13 @@
+{
+  "slug": "web-doc-site",
+  "name": "产品文档站",
+  "type": "WEB",
+  "category": "内容",
+  "summary": "左侧目录、正文与右侧页内导航三栏结构，带搜索与深色模式。",
+  "description": "适合产品手册、接口文档或内部知识库的文档站骨架：左侧分组目录可折叠，顶部搜索能实时过滤条目，右侧页内导航随滚动高亮当前小节。支持深浅两种主题，正文里的提示块与代码块样式可直接复用。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "sortOrder": 13,
+  "files": ["index.html"]
+}

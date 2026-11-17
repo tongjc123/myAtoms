@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/11-16-s1-project-generation/design.md","reason":"Shared API and ownership boundaries"}
+{"file":".trellis/spec/project-contract.md","reason":"Product scope and invariants"}
+{"file":".trellis/spec/backend/index.md","reason":"Backend conventions"}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend conventions"}

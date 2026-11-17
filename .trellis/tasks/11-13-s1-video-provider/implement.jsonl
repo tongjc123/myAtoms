@@ -1,0 +1,5 @@
+{"file":".trellis/spec/project-contract.md","reason":"Real providers or explicit failure; secrets never leave the server; budget before paid calls"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Section 8 model adapter and section 5.4 video pipeline contract"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/provider/ArkClient.java","reason":"Provider adapter under test"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/provider/ProviderStatusService.java","reason":"Readiness probe and caching"}
+{"file":".env.example","reason":"Documented server-side provider configuration"}

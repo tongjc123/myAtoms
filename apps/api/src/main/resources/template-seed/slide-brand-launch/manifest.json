@@ -1,0 +1,12 @@
+{
+  "slug": "slide-brand-launch",
+  "name": "新品发布营销方案",
+  "type": "SLIDES",
+  "category": "市场营销",
+  "summary": "从市场判断到渠道排期的完整发布方案，大字排版有冲击力",
+  "description": "面向大促与新品发布的营销方案模板：市场判断、目标预算、内容策略、渠道组合、节奏排期一站到位。瑞士网格版式，适合在评审会上快速讲清「为什么这么打」。",
+  "author": "Atoms Demo 自研示例",
+  "sortOrder": 11,
+  "engine": "slide-deck",
+  "files": ["deck.json"]
+}

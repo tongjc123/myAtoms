@@ -1,0 +1,13 @@
+{
+  "slug": "web-product-launch",
+  "name": "SaaS 产品落地页",
+  "type": "WEB",
+  "category": "营销",
+  "summary": "含产品首屏、功能分区、价格切换与常见问题，适合新品发布与投放。",
+  "description": "面向 B 端产品的标准落地页结构：一句价值主张抓住注意力，用产品界面示意承接，再依次讲功能、价格与常见问题。价格支持月付/年付切换并实时重算，常见问题可折叠展开，移动端自动重排。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "sortOrder": 11,
+  "files": ["index.html"]
+}

@@ -1,0 +1,14 @@
+{
+  "slug": "star-swarm",
+  "name": "星海防线",
+  "type": "GAME",
+  "category": "射击",
+  "summary": "操控飞船击落一波波入侵舰队，得分越高，波次越猛。",
+  "description": "自动开火的竖版太空射击。左右移动躲避敌机，撑住不断加速的波次；重型敌舰需要三发命中，击落得分更高。分数每 220 分提升一个波次，敌机速度随之加快。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "cover": "cover.svg",
+  "sortOrder": 10,
+  "files": ["index.html", "cover.svg"]
+}

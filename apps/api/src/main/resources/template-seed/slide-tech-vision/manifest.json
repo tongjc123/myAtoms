@@ -1,0 +1,12 @@
+{
+  "slug": "slide-tech-vision",
+  "name": "技术愿景发布",
+  "type": "SLIDES",
+  "category": "科技",
+  "summary": "深色克制的技术愿景演示，适合产品发布与内部分享",
+  "description": "深色极简的愿景型模板：先立论点，再用三条主线拆解平台演进，最后落到路线图。适合技术发布、年度规划与对外分享，暗色版式在投影与线上直播都清晰。",
+  "author": "Atoms Demo 自研示例",
+  "sortOrder": 13,
+  "engine": "slide-deck",
+  "files": ["deck.json"]
+}

@@ -1,0 +1,14 @@
+{
+  "slug": "sky-hopper",
+  "name": "云端跳跃",
+  "type": "GAME",
+  "category": "平台跳跃",
+  "summary": "踩着云层里的平台一路向上，别掉回云海。",
+  "description": "自动弹跳的垂直平台跳跃。踩到平台就会被弹起，绿色弹簧平台能跳得更高，黄色平台会左右移动。高度越高，平台间距越大。记录本次攀爬高度与平台数。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "cover": "cover.svg",
+  "sortOrder": 30,
+  "files": ["index.html", "cover.svg"]
+}

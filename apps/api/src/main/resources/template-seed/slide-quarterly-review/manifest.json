@@ -1,0 +1,12 @@
+{
+  "slug": "slide-quarterly-review",
+  "name": "商务季度复盘",
+  "type": "SLIDES",
+  "category": "商务",
+  "summary": "含数据看板的季度经营复盘，适合汇报与内部评审",
+  "description": "一套面向管理层的季度复盘模板：先给结论与关键数据，再拆解增长来源、成本效率与下季度重点。版式为 16:9，标题层级、数据卡片与结尾页可直接替换成你的内容。",
+  "author": "Atoms Demo 自研示例",
+  "sortOrder": 10,
+  "engine": "slide-deck",
+  "files": ["deck.json"]
+}

@@ -1,0 +1,3 @@
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/TemplateApiTest.java","reason":"New WEB case: catalogue is playable, every bundle serves HTML, clone is typed WEB and its preview equals the template bytes"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Section 5.1.1 states what the web template path implements and what remains missing"}
+{"file":".trellis/tasks/11-17-s1-web-templates/implement.md","reason":"Verification log: 40 backend tests, headless walkthrough, and the three defects found and fixed"}

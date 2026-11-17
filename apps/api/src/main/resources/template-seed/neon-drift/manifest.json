@@ -1,0 +1,14 @@
+{
+  "slug": "neon-drift",
+  "name": "霓虹疾驰",
+  "type": "GAME",
+  "category": "竞速",
+  "summary": "三车道无限车流，速度只增不减，换道要果断。",
+  "description": "俯视角度的无尽竞速。左右切换车道躲避车流，速度随距离持续提升；蓝色能量电池提供额外分数。撞车即结束，成绩按距离与得分结算。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "cover": "cover.svg",
+  "sortOrder": 20,
+  "files": ["index.html", "cover.svg"]
+}

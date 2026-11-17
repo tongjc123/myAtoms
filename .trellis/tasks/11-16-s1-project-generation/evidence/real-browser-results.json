@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-16T07:15:00.423Z",
+  "mode": "real API/MySQL; only local slides generation; no paid submissions",
+  "passed": 10,
+  "checks": [
+    "WEB project has an enabled real generation entry",
+    "GAME project has an enabled real generation entry",
+    "cloned GAME exposes an instruction edit composer",
+    "VIDEO project has an enabled real generation entry",
+    "VIDEO project exposes model/specification controls",
+    "SLIDES project has an enabled real generation entry",
+    "SLIDES project entry executes local generation and persists an artifact",
+    "generated slides survive browser refresh",
+    "mobile project edit controls have no horizontal overflow",
+    "no uncaught browser exceptions"
+  ]
+}

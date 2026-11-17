@@ -1,0 +1,9 @@
+{"file":".trellis/spec/project-contract.md","reason":"Real content or explicit failure; no fake generation; secrets stay server-side"}
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R02 generation, R13 versions/preview, R16 cancellation, R20 templates, R21 imported material"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Section 5.3.1 records the implemented local layout engine and the run event log"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/run/RunService.java","reason":"Six-step pipeline, event emission order and slice-based cancellation"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/run/RunController.java","reason":"SSE replay-then-follow contract with a seq cursor"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/slides/SlidePlanner.java","reason":"Deterministic planning, claim selection and title cleanup"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/slides/DeckRenderer.java","reason":"Single-file inline rendering required by the preview CSP"}
+{"file":"apps/web/src/features/chat/ChatPage.tsx","reason":"Thinking timeline, stop button, artifact card and preview panel"}
+{"file":"apps/web/src/features/slides/SlideComposer.tsx","reason":"Template chip, seeded request and project naming"}

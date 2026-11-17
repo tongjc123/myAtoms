@@ -1,0 +1,32 @@
+{
+  "id": "atoms-demo-v3",
+  "name": "atoms-demo-v3",
+  "title": "Atoms Demo v3 implementation",
+  "description": "Approved four-stage delivery of the anonymous Atoms-style generation platform; completion requires all R01-R28.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P0",
+  "creator": "admin",
+  "assignee": "admin",
+  "createdAt": "2026-11-12",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "11-12-v3-docs-trellis",
+    "11-12-s1-web-workbench",
+    "11-12-s2-agents-data",
+    "11-12-s3-slides",
+    "11-12-s4-video-acceptance"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

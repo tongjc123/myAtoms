@@ -1,0 +1,10 @@
+{"file":".trellis/spec/project-contract.md","reason":"Real content or explicit failure; templates must run for real, no simulated pages"}
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R20 templates, R13 versions and preview, T20 browser verification"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Section 5.1.1 records what the web template path implements and what is still missing"}
+{"file":"apps/api/src/main/resources/template-seed/web-portfolio-minimal/index.html","reason":"Portfolio template: filtering, reveal on scroll, copy-to-clipboard fallback"}
+{"file":"apps/api/src/main/resources/template-seed/web-product-launch/index.html","reason":"Landing page template: pricing cycle recompute and FAQ accordion"}
+{"file":"apps/api/src/main/resources/template-seed/web-event-signup/index.html","reason":"Event template: live countdown and a form that validates locally and says so"}
+{"file":"apps/api/src/main/resources/template-seed/web-doc-site/index.html","reason":"Docs template: sidebar search filter, scrollspy and light/dark theme"}
+{"file":"apps/web/src/features/web/WebFrame.tsx","reason":"Fixed 1280x800 design viewport scaled by ResizeObserver, shared by cover, peek and dialog"}
+{"file":"apps/web/src/features/web/WebTemplateCard.tsx","reason":"Static-but-running cover plus ?peek=1 hover overlay"}
+{"file":"apps/web/src/features/web/WebPreviewDialog.tsx","reason":"Desktop/phone viewports, clone form, keyboard dismissal"}

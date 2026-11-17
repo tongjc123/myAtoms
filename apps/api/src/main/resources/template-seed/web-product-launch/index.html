@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>潮汐 · 客户反馈中枢</title>
+<style>
+  :root {
+    --ink: #12141c;
+    --body: #4d5364;
+    --muted: #868da0;
+    --line: #e8eaf0;
+    --bg: #ffffff;
+    --soft: #f6f7fb;
+    --brand: #3b4fd8;
+    --brand-soft: #eef0fe;
+    --mint: #0e9f8a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.65;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { width: min(1120px, calc(100% - 64px)); margin: 0 auto; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 22px; border: 1px solid transparent; border-radius: 10px;
+    font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: transform .16s, box-shadow .16s, background .16s, border-color .16s;
+  }
+  .btn.primary { background: var(--brand); color: #fff; box-shadow: 0 10px 24px rgba(59, 79, 216, .24); }
+  .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(59, 79, 216, .3); }
+  .btn.ghost { border-color: var(--line); background: #fff; color: var(--ink); }
+  .btn.ghost:hover { border-color: #cdd2e2; background: var(--soft); }
+
+  header.site { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.86); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: box-shadow .2s, border-color .2s; border-bottom: 1px solid transparent; }
+  header.site.scrolled { border-color: var(--line); box-shadow: 0 8px 24px rgba(20, 24, 40, .05); }
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 26px; padding: 15px 0; }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -.02em; }
+  .logo i { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(140deg, #3b4fd8, #7c8cf5); display: block; position: relative; }
+  .logo i::after { content: ""; position: absolute; inset: 7px 6px; border: 2px solid #fff; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+  .nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--body); }
+  .nav-links a:hover { color: var(--brand); }
+  .nav-actions { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+  .nav-actions a.login { color: var(--body); }
+  .nav-actions a.login:hover { color: var(--brand); }
+
+  .hero { padding: 76px 0 40px; text-align: center; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 12px; font-weight: 600; }
+  .pill b { background: #fff; border-radius: 999px; padding: 1px 7px; font-size: 10.5px; }
+  .hero h1 { margin: 22px auto 0; max-width: 20ch; font-size: clamp(34px, 5.4vw, 62px); line-height: 1.1; letter-spacing: -.045em; }
+  .hero h1 span { background: linear-gradient(100deg, #3b4fd8, #6e7ef0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.lede { max-width: 56ch; margin: 20px auto 0; color: var(--body); font-size: clamp(14px, 1.6vw, 16.5px); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+  .hero-note { margin-top: 14px; font-size: 12px; color: var(--muted); }
+
+  .shot {
+    margin: 46px auto 0; max-width: 1000px; border: 1px solid var(--line); border-radius: 18px;
+    background: #fff; box-shadow: 0 30px 70px rgba(22, 28, 52, .12); overflow: hidden;
+  }
+  .shot-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--line); background: #fbfbfd; }
+  .shot-bar i { width: 8px; height: 8px; border-radius: 50%; background: #dfe2ea; }
+  .shot-bar span { margin-left: 10px; font-size: 11px; color: var(--muted); }
+  .shot-body { display: grid; grid-template-columns: 158px 1fr; min-height: 300px; }
+  .shot-side { border-right: 1px solid var(--line); padding: 16px 12px; display: grid; gap: 8px; align-content: start; background: #fcfcfe; }
+  .shot-side span { height: 9px; border-radius: 5px; background: #eceef5; }
+  .shot-side span:nth-child(1) { width: 72%; background: #dfe3f7; }
+  .shot-side span:nth-child(3) { width: 84%; }
+  .shot-main { padding: 18px 20px; display: grid; gap: 14px; }
+  .shot-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .shot-kpi { border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; }
+  .shot-kpi small { display: block; font-size: 10px; color: var(--muted); }
+  .shot-kpi b { font-size: 19px; letter-spacing: -.02em; }
+  .shot-kpi em { font-style: normal; font-size: 10.5px; color: var(--mint); }
+  .shot-chart { display: flex; align-items: flex-end; gap: 8px; height: 148px; padding: 10px 4px 0; }
+  .shot-chart i { flex: 1; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #8d9bf0, #dfe3fb); }
+  .shot-chart i:nth-child(3n) { background: linear-gradient(180deg, #3b4fd8, #c7cffa); }
+
+  section.block { padding: 74px 0; }
+  .logos { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 26px 0; background: var(--soft); }
+  .logos-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 34px; font-size: 12px; color: var(--muted); }
+  .logos-inner b { font-weight: 600; letter-spacing: .04em; color: #9aa1b4; font-size: 14px; }
+
+  .head-center { text-align: center; max-width: 640px; margin: 0 auto 42px; }
+  .head-center h2 { margin: 0 0 12px; font-size: clamp(24px, 3.2vw, 36px); letter-spacing: -.03em; }
+  .head-center p { margin: 0; color: var(--body); font-size: 14.5px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .feature { border: 1px solid var(--line); border-radius: 16px; padding: 24px 22px; background: #fff; transition: transform .18s, box-shadow .18s; }
+  .feature:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(24, 30, 56, .08); }
+  .feature .icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--brand-soft); margin-bottom: 16px; }
+  .feature .icon svg { width: 19px; height: 19px; stroke: var(--brand); fill: none; stroke-width: 1.7; }
+  .feature h3 { margin: 0 0 7px; font-size: 15.5px; }
+  .feature p { margin: 0; font-size: 13px; color: var(--body); }
+
+  .pricing { background: var(--soft); }
+  .toggle { display: flex; justify-content: center; margin-bottom: 34px; }
+  .toggle-inner { display: inline-flex; padding: 4px; border-radius: 999px; background: #fff; border: 1px solid var(--line); }
+  .toggle-inner button { padding: 8px 20px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12.5px; color: var(--body); cursor: pointer; }
+  .toggle-inner button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+  .toggle-inner b { font-size: 10.5px; margin-left: 5px; opacity: .85; font-weight: 600; }
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+  .plan { position: relative; border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 26px 24px; }
+  .plan.featured { border-color: #b9c1f3; box-shadow: 0 22px 50px rgba(59, 79, 216, .14); }
+  .plan .tag { position: absolute; top: -11px; left: 24px; padding: 3px 11px; border-radius: 999px; background: var(--brand); color: #fff; font-size: 10.5px; letter-spacing: .04em; }
+  .plan h3 { margin: 0 0 4px; font-size: 15px; }
+  .plan .for { margin: 0 0 16px; font-size: 12.5px; color: var(--muted); }
+  .price { display: flex; align-items: baseline; gap: 6px; }
+  .price b { font-size: 36px; letter-spacing: -.04em; }
+  .price span { font-size: 12px; color: var(--muted); }
+  .price sub { font-size: 15px; top: -.1em; }
+  .plan .bill-note { margin: 6px 0 18px; font-size: 11.5px; color: var(--mint); min-height: 18px; }
+  .plan ul { margin: 0 0 20px; padding: 0; list-style: none; display: grid; gap: 9px; font-size: 12.5px; color: var(--body); }
+  .plan ul li::before { content: "✓"; color: var(--mint); margin-right: 8px; font-weight: 700; }
+  .plan .btn { width: 100%; }
+
+  .quote { text-align: center; max-width: 780px; margin: 0 auto; }
+  .quote blockquote { margin: 0; font-size: clamp(19px, 2.8vw, 27px); line-height: 1.55; letter-spacing: -.02em; }
+  .quote figcaption { margin-top: 20px; font-size: 12.5px; color: var(--muted); }
+  .quote .stars { color: #f0a92c; letter-spacing: 2px; font-size: 13px; margin-bottom: 16px; }
+
+  .faq-list { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+  .faq { border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; }
+  .faq button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 20px; border: 0; background: transparent; font: inherit; font-size: 13.5px; font-weight: 600; text-align: left; cursor: pointer; }
+  .faq button i { width: 9px; height: 9px; border-right: 1.7px solid var(--muted); border-bottom: 1.7px solid var(--muted); transform: rotate(45deg); transition: transform .2s; flex-shrink: 0; }
+  .faq[open-like="true"] button i { transform: rotate(-135deg); }
+  .faq .answer { display: none; padding: 0 20px 18px; font-size: 13px; color: var(--body); }
+  .faq.is-open .answer { display: block; }
+
+  .cta { text-align: center; padding: 78px 0; background: linear-gradient(160deg, #1b2350, #2c3a8f); color: #fff; }
+  .cta h2 { margin: 0 0 12px; font-size: clamp(24px, 3.4vw, 38px); letter-spacing: -.03em; }
+  .cta p { margin: 0 0 26px; color: rgba(255,255,255,.72); font-size: 14px; }
+  .cta .btn.primary { background: #fff; color: #1b2350; box-shadow: none; }
+
+  footer { padding: 34px 0; border-top: 1px solid var(--line); }
+  .foot { display: flex; flex-wrap: wrap; gap: 16px 34px; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+  .foot nav { display: flex; gap: 20px; }
+  .foot nav a:hover { color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .features, .plans { grid-template-columns: 1fr; }
+    .shot-body { grid-template-columns: 1fr; }
+    .shot-side { display: none; }
+  }
+  @media (max-width: 760px) {
+    .wrap { width: calc(100% - 40px); }
+    .nav-links { display: none; }
+    .hero { padding: 48px 0 28px; }
+    .shot-kpis { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="site" id="site-header">
+  <div class="wrap nav">
+    <a class="logo" href="#top"><i aria-hidden="true"></i>潮汐</a>
+    <nav class="nav-links" aria-label="产品导航">
+      <a href="#features">功能</a>
+      <a href="#pricing">价格</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="login" href="#pricing">登录</a>
+      <a class="btn primary" href="#pricing">免费试用</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero wrap">
+    <span class="pill">v3.0 已发布 <b>新增自动归类</b></span>
+    <h1>把散落各处的<span>客户反馈</span>，收进一个能推进的地方。</h1>
+    <p class="lede">潮汐把客服工单、应用商店评论、社群消息和访谈记录统一归类，自动识别重复问题，并一路跟进到上线。团队不用再靠表格对齐"到底有多少人在提这件事"。</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="#pricing">免费试用 14 天</a>
+      <a class="btn ghost" href="#features">看看怎么用</a>
+    </div>
+    <p class="hero-note">无需信用卡 · 5 分钟接入现有渠道</p>
+
+    <div class="shot" aria-hidden="true">
+      <div class="shot-bar"><i></i><i></i><i></i><span>app.tide.dev / 反馈看板</span></div>
+      <div class="shot-body">
+        <div class="shot-side">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="shot-main">
+          <div class="shot-kpis">
+            <div class="shot-kpi"><small>本周新增反馈</small><b>1,284</b> <em>+18%</em></div>
+            <div class="shot-kpi"><small>已归类</small><b>96.4%</b> <em>+2.1%</em></div>
+            <div class="shot-kpi"><small>平均响应</small><b>3.2h</b> <em>-42%</em></div>
+          </div>
+          <div class="shot-chart">
+            <i style="height:42%"></i><i style="height:58%"></i><i style="height:36%"></i><i style="height:66%"></i>
+            <i style="height:52%"></i><i style="height:74%"></i><i style="height:48%"></i><i style="height:82%"></i>
+            <i style="height:61%"></i><i style="height:70%"></i><i style="height:88%"></i><i style="height:76%"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="logos">
+    <div class="wrap logos-inner">
+      <b>北岸数据</b><b>拾光咖啡</b><b>Flow 协作</b><b>山海出行</b><b>原点实验室</b>
+      <span>以及 400+ 个产品团队</span>
+    </div>
+  </div>
+
+  <section class="block wrap" id="features">
+    <div class="head-center">
+      <h2>从收到反馈，到真正上线</h2>
+      <p>三段流程各自独立，也可以只开其中一段。</p>
+    </div>
+    <div class="features">
+      <article class="feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13" stroke-linecap="round"/></svg></div>
+        <h3>统一收口</h3>
+        <p>邮件、工单、应用商店、社群与访谈记录接入同一个入口，保留原文与来源，不再丢上下文。</p>
+      </article>
+      <article class="feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 6.3 6.4.5-4.9 4.2 1.5 6.3L12 17l-5.6 3.3 1.5-6.3L3 9.8l6.4-.5z" stroke-linejoin="round"/></svg></div>
+        <h3>自动归类</h3>
+        <p>按主题、严重程度与客户分层自动打标，重复反馈合并计数，优先级由影响面而不是嗓门决定。</p>
+      </article>
+      <article class="feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>闭环跟进</h3>
+        <p>每条主题都能挂到需求与版本上，上线后自动回信给提过反馈的客户，形成可见的闭环。</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="block pricing" id="pricing">
+    <div class="wrap">
+      <div class="head-center">
+        <h2>按人数计费，随时可停</h2>
+        <p>年付省 20%，未用完的席位可以随时调整。</p>
+      </div>
+      <div class="toggle">
+        <div class="toggle-inner" role="group" aria-label="计费周期">
+          <button type="button" data-cycle="month" aria-pressed="true">月付</button>
+          <button type="button" data-cycle="year" aria-pressed="false">年付<b>-20%</b></button>
+        </div>
+      </div>
+      <div class="plans">
+        <article class="plan">
+          <h3>起步版</h3>
+          <p class="for">刚起步的小团队</p>
+          <div class="price"><sub>¥</sub><b data-price data-month="0">0</b><span>/ 人 / 月</span></div>
+          <p class="bill-note" data-note>3 人以内永久免费</p>
+          <ul><li>2 个接入渠道</li><li>每月 500 条反馈</li><li>基础归类规则</li></ul>
+          <a class="btn ghost" href="#top">开始使用</a>
+        </article>
+        <article class="plan featured">
+          <span class="tag">最受欢迎</span>
+          <h3>团队版</h3>
+          <p class="for">需要闭环的产品团队</p>
+          <div class="price"><sub>¥</sub><b data-price data-month="99">99</b><span>/ 人 / 月</span></div>
+          <p class="bill-note" data-note>按月计费，随时取消</p>
+          <ul><li>不限接入渠道</li><li>自动归类与去重</li><li>需求与版本关联</li><li>客户回信通知</li></ul>
+          <a class="btn primary" href="#top">免费试用 14 天</a>
+        </article>
+        <article class="plan">
+          <h3>企业版</h3>
+          <p class="for">需要私有部署与审计</p>
+          <div class="price"><b style="font-size:26px">按需报价</b></div>
+          <p class="bill-note" data-note>含专属实施与 SLA</p>
+          <ul><li>单点登录与细粒度权限</li><li>私有化部署</li><li>审计日志与数据导出</li><li>专属客户成功</li></ul>
+          <a class="btn ghost" href="#top">预约演示</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block wrap">
+    <figure class="quote">
+      <div class="stars" aria-label="五星评价">★★★★★</div>
+      <blockquote>"以前每周要花半天整理反馈表格，现在打开看板就知道哪三个问题最该修。评审会上没有人再问'这是谁说的'。"</blockquote>
+      <figcaption>周砚 · 产品负责人，北岸数据</figcaption>
+    </figure>
+  </section>
+
+  <section class="block wrap" id="faq">
+    <div class="head-center"><h2>常见问题</h2><p>没有找到答案？写信到 hello@tide.dev。</p></div>
+    <div class="faq-list">
+      <div class="faq">
+        <button type="button" aria-expanded="false">接入需要开发资源吗？<i aria-hidden="true"></i></button>
+        <p class="answer">大部分渠道是开箱即用的授权接入，不需要写代码。如果要把反馈回写到自有系统，我们提供 REST 接口与 Webhook。</p>
+      </div>
+      <div class="faq">
+        <button type="button" aria-expanded="false">历史数据可以导入吗？<i aria-hidden="true"></i></button>
+        <p class="answer">可以。支持 CSV 与表格文件导入，导入时会按来源与时间建立索引，重复内容会自动合并计数。</p>
+      </div>
+      <div class="faq">
+        <button type="button" aria-expanded="false">数据存放在哪里？<i aria-hidden="true"></i></button>
+        <p class="answer">默认存放在境内多可用区，支持按项目设置保留周期与导出。企业版可以选择私有化部署。</p>
+      </div>
+      <div class="faq">
+        <button type="button" aria-expanded="false">可以中途换套餐吗？<i aria-hidden="true"></i></button>
+        <p class="answer">可以，升级立即生效并按天折算，降级在下一个计费周期生效，已经产生的数据不会删除。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <h2>今天的反馈，明天就能被修掉。</h2>
+      <p>14 天免费试用，不需要信用卡。</p>
+      <a class="btn primary" href="#pricing">开始免费试用</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 潮汐科技 · 本页为 Atoms Demo 模板示例，产品与客户均为虚构</span>
+    <nav aria-label="页脚导航"><a href="#features">功能</a><a href="#pricing">价格</a><a href="#faq">常见问题</a></nav>
+  </div>
+</footer>
+
+<script>
+  // 顶栏滚动阴影
+  var header = document.getElementById('site-header');
+  function onScroll() { header.classList.toggle('scrolled', window.scrollY > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // 月付 / 年付切换：只改真实展示价格，不做假折扣文案
+  var cycleButtons = document.querySelectorAll('.toggle-inner button');
+  var monthly = 99;
+  cycleButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      var cycle = button.dataset.cycle;
+      cycleButtons.forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
+      document.querySelectorAll('[data-price]').forEach(function (node) {
+        var base = Number(node.dataset.month);
+        node.textContent = base === 0 ? '0' : String(cycle === 'year' ? Math.round(base * 0.8) : base);
+      });
+      document.querySelectorAll('[data-note]').forEach(function (node, index) {
+        if (index > 1) return;
+        node.textContent = index === 0
+          ? '3 人以内永久免费'
+          : cycle === 'year' ? '年付 ¥' + Math.round(monthly * 0.8 * 12) + ' / 人，一次性结算' : '按月计费，随时取消';
+      });
+    });
+  });
+
+  // 常见问题折叠
+  document.querySelectorAll('.faq').forEach(function (faq) {
+    var button = faq.querySelector('button');
+    button.addEventListener('click', function () {
+      var open = !faq.classList.contains('is-open');
+      faq.classList.toggle('is-open', open);
+      faq.setAttribute('open-like', String(open));
+      button.setAttribute('aria-expanded', String(open));
+    });
+  });
+</script>
+<script>
+  // 模板悬停预览：带 ?peek=1 时整页缓慢上下巡游。
+  if (location.search.indexOf('peek=1') > -1) {
+    var y = 0, dir = 1;
+    (function step() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 60) {
+        y += dir * 0.7;
+        if (y > max) { y = max; dir = -1; }
+        if (y < 0) { y = 0; dir = 1; }
+        window.scrollTo(0, Math.round(y));
+      }
+      requestAnimationFrame(step);
+    })();
+  }
+</script>
+</body>
+</html>

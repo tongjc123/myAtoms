@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>星海防线</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #05070f; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; color: #e8f1ff; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hud { position: fixed; inset: 14px 16px auto 16px; display: flex; align-items: center; gap: 18px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #7f9bbf; pointer-events: none; }
+  .hud b { display: block; margin-top: 4px; font-size: 20px; letter-spacing: .04em; color: #e8f1ff; font-variant-numeric: tabular-nums; }
+  .hud .right { margin-left: auto; text-align: right; }
+  .lives { display: flex; gap: 6px; margin-top: 6px; }
+  .lives i { width: 12px; height: 12px; border-radius: 3px; background: #35e0c8; box-shadow: 0 0 10px #35e0c8aa; }
+  .lives i.gone { background: #1d2838; box-shadow: none; }
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 45%, rgba(8,14,28,.55), rgba(3,5,12,.92)); backdrop-filter: blur(2px); transition: opacity .18s ease; }
+  .overlay[hidden] { display: none; }
+  .panel { width: min(520px, 100%); text-align: center; }
+  .kicker { font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: #4f7fa8; }
+  h1 { margin: 10px 0 6px; font-size: clamp(30px, 6vw, 46px); letter-spacing: .1em; font-weight: 800;
+       background: linear-gradient(180deg, #ffffff, #7fe6ff 55%, #35e0c8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { margin: 0 0 22px; font-size: 14px; color: #8fa8c4; letter-spacing: .06em; }
+  .keys { display: grid; gap: 8px; margin: 0 auto 24px; max-width: 360px; font-size: 13px; color: #94aec7; }
+  .keys div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #1b283c; padding-bottom: 6px; }
+  kbd { font: inherit; padding: 2px 8px; border-radius: 5px; background: #131e2e; border: 1px solid #26384f; color: #cfe6ff; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 999px; padding: 13px 34px; font-weight: 600; letter-spacing: .08em;
+           background: linear-gradient(135deg, #35e0c8, #37a5ff); color: #04121a; box-shadow: 0 10px 30px rgba(53,224,200,.28); }
+  button:hover { filter: brightness(1.08); }
+  button:focus-visible { outline: 2px solid #9beeff; outline-offset: 3px; }
+  .score-line { margin: 0 0 18px; font-size: 13px; color: #8fa8c4; }
+  .score-line strong { display: block; margin-top: 4px; font-size: 42px; color: #e8f1ff; font-variant-numeric: tabular-nums; }
+  .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 11px; letter-spacing: .18em; color: #35506b; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="hud">
+  <div>得分<b id="score">0</b></div>
+  <div>波次<b id="wave">1</b></div>
+  <div class="right">护盾<div class="lives" id="lives"><i></i><i></i><i></i></div></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <p class="kicker">Stellar Defense</p>
+    <h1>星海防线</h1>
+    <p class="tagline" id="tagline">守住最后一道星门，别让舰队越过底线。</p>
+    <div class="score-line" id="scoreLine" hidden>本次得分<strong id="finalScore">0</strong></div>
+    <div class="keys" id="keys">
+      <div><span>左右移动</span><span><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> / 拖动</span></div>
+      <div><span>自动开火</span><span>无需按键</span></div>
+      <div><span>开始</span><span><kbd>空格</kbd> 或点击</span></div>
+    </div>
+    <button id="action">开始战斗</button>
+  </div>
+</div>
+<div class="hint">星海防线 · 平台自研示例</div>
+<script>
+(function () {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const action = document.getElementById('action');
+  const scoreEl = document.getElementById('score');
+  const waveEl = document.getElementById('wave');
+  const livesEl = document.getElementById('lives');
+  const taglineEl = document.getElementById('tagline');
+  const scoreLine = document.getElementById('scoreLine');
+  const finalScore = document.getElementById('finalScore');
+  const keys = document.getElementById('keys');
+
+  let W = 0, H = 0, DPR = 1;
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  const state = { mode: 'title', score: 0, wave: 1, lives: 3, spawn: 0.6, shake: 0, time: 0 };
+  const player = { x: 0, y: 0, r: 15, vx: 0, targetX: null, cooldown: 0 };
+  let bullets = [], enemies = [], particles = [], stars = [], pickups = [];
+  const pressed = new Set();
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    player.y = H - Math.max(70, H * 0.14);
+    if (state.mode === 'title') player.x = W / 2;
+    player.x = clamp(player.x || W / 2, 24, W - 24);
+    stars = Array.from({ length: Math.round((W * H) / 5200) }, () => ({
+      x: Math.random() * W, y: Math.random() * H, z: rand(0.3, 1), s: rand(0.6, 1.9),
+    }));
+  }
+
+  function reset() {
+    state.score = 0; state.wave = 1; state.lives = 3; state.spawn = 0.7; state.time = 0; state.shake = 0;
+    bullets = []; enemies = []; particles = []; pickups = [];
+    player.x = W / 2; player.vx = 0; player.targetX = null; player.cooldown = 0;
+    scoreEl.textContent = '0'; waveEl.textContent = '1'; renderLives();
+  }
+
+  function renderLives() {
+    [...livesEl.children].forEach((node, index) => node.classList.toggle('gone', index >= state.lives));
+  }
+
+  function start() {
+    reset();
+    state.mode = 'playing';
+    overlay.hidden = true;
+  }
+
+  function gameOver() {
+    state.mode = 'over';
+    overlay.hidden = false;
+    taglineEl.textContent = '防线被突破。下一次，撑得更久一点。';
+    scoreLine.hidden = false;
+    finalScore.textContent = state.score;
+    keys.hidden = true;
+    action.textContent = '再来一次';
+  }
+
+  function spawnEnemy() {
+    const heavy = state.wave >= 3 && Math.random() < 0.22;
+    const radius = heavy ? 22 : 14;
+    enemies.push({
+      x: rand(radius + 12, W - radius - 12),
+      y: -radius - 10,
+      r: radius,
+      hp: heavy ? 3 : 1,
+      maxHp: heavy ? 3 : 1,
+      vy: rand(52, 78) * (1 + state.wave * 0.11) * (heavy ? 0.66 : 1),
+      drift: rand(-1, 1) * (heavy ? 12 : 34),
+      phase: Math.random() * Math.PI * 2,
+      hit: 0,
+    });
+  }
+
+  function burst(x, y, color, count, power) {
+    for (let index = 0; index < count; index++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = rand(power * 0.3, power);
+      particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: rand(0.3, 0.75), max: 0.75, color, size: rand(1.4, 3.4) });
+    }
+  }
+
+  function shoot() {
+    bullets.push({ x: player.x, y: player.y - 20, vy: -760, r: 4 });
+    burst(player.x, player.y - 20, '#8ff6ff', 3, 90);
+  }
+
+  function hitPlayer() {
+    if (state.mode !== 'playing') return;
+    state.lives -= 1;
+    renderLives();
+    state.shake = 0.5;
+    burst(player.x, player.y, '#ff7b8a', 26, 320);
+    if (state.lives <= 0) gameOver();
+  }
+
+  function update(dt) {
+    state.time += dt;
+    if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 1.6);
+
+    for (const star of stars) {
+      star.y += (26 + star.z * 90) * dt;
+      if (star.y > H) { star.y = -2; star.x = Math.random() * W; }
+    }
+    if (state.mode !== 'playing') return;
+
+    let direction = 0;
+    if (pressed.has('ArrowLeft') || pressed.has('a')) direction -= 1;
+    if (pressed.has('ArrowRight') || pressed.has('d')) direction += 1;
+    if (direction !== 0) {
+      player.targetX = null;
+      player.vx = direction * 360;
+    } else if (player.targetX !== null) {
+      player.vx = (player.targetX - player.x) * 9;
+    } else {
+      player.vx *= 0.82;
+    }
+    player.x = clamp(player.x + player.vx * dt, player.r + 8, W - player.r - 8);
+    if (player.targetX !== null && Math.abs(player.targetX - player.x) < 2) player.vx = 0;
+
+    player.cooldown -= dt;
+    if (player.cooldown <= 0) { shoot(); player.cooldown = 0.145; }
+
+    state.spawn -= dt;
+    if (state.spawn <= 0) {
+      spawnEnemy();
+      state.spawn = Math.max(0.16, 0.82 - state.wave * 0.055) * rand(0.72, 1.3);
+    }
+
+    for (const bullet of bullets) bullet.y += bullet.vy * dt;
+    bullets = bullets.filter((bullet) => bullet.y > -20);
+
+    for (const enemy of enemies) {
+      enemy.y += enemy.vy * dt;
+      enemy.x += Math.sin(state.time * 1.8 + enemy.phase) * enemy.drift * dt;
+      enemy.x = clamp(enemy.x, enemy.r, W - enemy.r);
+      if (enemy.hit > 0) enemy.hit -= dt;
+    }
+
+    for (let b = bullets.length - 1; b >= 0; b--) {
+      const bullet = bullets[b];
+      for (let e = enemies.length - 1; e >= 0; e--) {
+        const enemy = enemies[e];
+        const dx = bullet.x - enemy.x, dy = bullet.y - enemy.y;
+        if (dx * dx + dy * dy < (enemy.r + bullet.r) ** 2) {
+          bullets.splice(b, 1);
+          enemy.hp -= 1;
+          enemy.hit = 0.12;
+          if (enemy.hp <= 0) {
+            enemies.splice(e, 1);
+            state.score += enemy.maxHp > 1 ? 30 : 10;
+            scoreEl.textContent = state.score;
+            burst(enemy.x, enemy.y, enemy.maxHp > 1 ? '#ffcf6b' : '#5de2ff', 16, 260);
+            const nextWave = 1 + Math.floor(state.score / 220);
+            if (nextWave > state.wave) { state.wave = nextWave; waveEl.textContent = state.wave; }
+          }
+          break;
+        }
+      }
+    }
+
+    for (let index = enemies.length - 1; index >= 0; index--) {
+      const enemy = enemies[index];
+      const dx = enemy.x - player.x, dy = enemy.y - player.y;
+      if (dx * dx + dy * dy < (enemy.r + player.r * 0.82) ** 2) {
+        enemies.splice(index, 1);
+        burst(enemy.x, enemy.y, '#ff8a6b', 18, 240);
+        hitPlayer();
+      } else if (enemy.y - enemy.r > H) {
+        enemies.splice(index, 1);
+        hitPlayer();
+      }
+    }
+
+    for (const particle of particles) {
+      particle.x += particle.vx * dt; particle.y += particle.vy * dt;
+      particle.vx *= 0.96; particle.vy *= 0.96; particle.life -= dt;
+    }
+    particles = particles.filter((particle) => particle.life > 0);
+  }
+
+  function drawShip(x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = '#35e0c8'; ctx.shadowBlur = 18;
+    ctx.fillStyle = '#eaffff';
+    ctx.beginPath();
+    ctx.moveTo(0, -20); ctx.lineTo(13, 12); ctx.lineTo(0, 5); ctx.lineTo(-13, 12);
+    ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#37a5ff';
+    ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(6, 7); ctx.lineTo(0, 3); ctx.lineTo(-6, 7); ctx.closePath(); ctx.fill();
+    const flame = 8 + Math.sin(state.time * 30) * 3;
+    const gradient = ctx.createLinearGradient(0, 12, 0, 12 + flame);
+    gradient.addColorStop(0, 'rgba(140,246,255,.95)'); gradient.addColorStop(1, 'rgba(55,165,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath(); ctx.moveTo(-5, 10); ctx.lineTo(5, 10); ctx.lineTo(0, 14 + flame); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.save();
+    if (state.shake > 0) ctx.translate(rand(-1, 1) * state.shake * 9, rand(-1, 1) * state.shake * 9);
+
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#050a16'); sky.addColorStop(0.55, '#071227'); sky.addColorStop(1, '#04131f');
+    ctx.fillStyle = sky; ctx.fillRect(-20, -20, W + 40, H + 40);
+
+    ctx.save();
+    const glow = ctx.createRadialGradient(W * 0.5, H * 0.15, 0, W * 0.5, H * 0.15, Math.max(W, H) * 0.7);
+    glow.addColorStop(0, 'rgba(60,130,220,.18)'); glow.addColorStop(1, 'rgba(5,8,16,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    for (const star of stars) {
+      ctx.globalAlpha = 0.25 + star.z * 0.65;
+      ctx.fillStyle = star.z > 0.8 ? '#bfe9ff' : '#6f8fbf';
+      ctx.fillRect(star.x, star.y, star.s, star.s * 2.4);
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = 'rgba(80,240,220,.25)';
+    ctx.setLineDash([14, 12]);
+    ctx.beginPath(); ctx.moveTo(0, H - 44); ctx.lineTo(W, H - 44); ctx.stroke();
+    ctx.setLineDash([]);
+
+    for (const bullet of bullets) {
+      ctx.fillStyle = '#9ff6ff'; ctx.shadowColor = '#35e0c8'; ctx.shadowBlur = 12;
+      ctx.fillRect(bullet.x - 2, bullet.y - 12, 4, 16);
+      ctx.shadowBlur = 0;
+    }
+
+    for (const enemy of enemies) {
+      ctx.save();
+      ctx.translate(enemy.x, enemy.y);
+      const heavy = enemy.maxHp > 1;
+      ctx.fillStyle = enemy.hit > 0 ? '#ffffff' : (heavy ? '#ffb648' : '#ff5f7a');
+      if (!heavy) {
+        ctx.shadowColor = '#ff5f7a'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.moveTo(0, 13); ctx.lineTo(13, -8); ctx.lineTo(0, -3); ctx.lineTo(-13, -8); ctx.closePath(); ctx.fill();
+      } else {
+        ctx.shadowColor = '#ffb648'; ctx.shadowBlur = 16;
+        ctx.beginPath();
+        for (let side = 0; side < 6; side++) {
+          const angle = Math.PI / 3 * side + Math.PI / 6;
+          const px = Math.cos(angle) * enemy.r, py = Math.sin(angle) * enemy.r;
+          side ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, enemy.r * 0.55, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    for (const particle of particles) {
+      ctx.globalAlpha = Math.max(0, particle.life / particle.max);
+      ctx.fillStyle = particle.color;
+      ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+    }
+    ctx.globalAlpha = 1;
+
+    if (state.mode !== 'title') drawShip(player.x, player.y);
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowLeft', 'ArrowRight', 'a', 'd', ' '].includes(event.key)) event.preventDefault();
+    pressed.add(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+    if ((event.key === ' ' || event.key === 'Enter') && state.mode !== 'playing') start();
+  });
+  window.addEventListener('keyup', (event) => pressed.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+  canvas.addEventListener('pointerdown', (event) => {
+    if (state.mode === 'title' || state.mode === 'over') { start(); return; }
+    player.targetX = event.clientX;
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    if (event.buttons) player.targetX = event.clientX;
+  });
+  canvas.addEventListener('pointerup', () => { player.vx = 0; });
+  action.addEventListener('click', start);
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

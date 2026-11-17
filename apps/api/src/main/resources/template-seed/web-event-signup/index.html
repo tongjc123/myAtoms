@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>夜行计划 05 · 城市夜谈</title>
+<style>
+  :root {
+    --ink: #0d0e11;
+    --ink-2: #14161b;
+    --card: #191c22;
+    --line: rgba(255, 255, 255, .1);
+    --text: #edeee9;
+    --muted: #9a9d9f;
+    --amber: #f2b24a;
+    --coral: #ef7a5a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.65;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { width: min(1040px, calc(100% - 64px)); margin: 0 auto; }
+  .serif { font-family: "Songti SC", "Noto Serif SC", Georgia, serif; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 0; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .topbar strong { color: var(--text); letter-spacing: .12em; font-size: 13px; }
+  .topbar .rsvp { padding: 8px 18px; border-radius: 999px; background: var(--amber); color: #1a1409; font-weight: 600; font-size: 12px; }
+  .topbar .rsvp:hover { background: #ffc76a; }
+
+  .hero { padding: 64px 0 20px; position: relative; }
+  .hero::before {
+    content: ""; position: absolute; inset: -80px -20% auto -20%; height: 520px;
+    background: radial-gradient(ellipse at 30% 10%, rgba(242, 178, 74, .16), transparent 62%),
+                radial-gradient(ellipse at 76% 30%, rgba(239, 122, 90, .13), transparent 60%);
+    pointer-events: none;
+  }
+  .hero > * { position: relative; }
+  .kicker { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 11.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--amber); }
+  .kicker span { color: var(--muted); letter-spacing: .12em; }
+  .hero h1 { margin: 22px 0 0; font-size: clamp(48px, 10vw, 118px); line-height: .92; letter-spacing: -.05em; font-weight: 700; }
+  .hero h1 em { font-style: normal; color: transparent; -webkit-text-stroke: 1.5px rgba(237, 238, 233, .55); }
+  .hero-sub { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: end; margin-top: 40px; }
+  .hero-sub p { margin: 0; max-width: 46ch; color: var(--muted); font-size: 14.5px; }
+  .when { text-align: right; }
+  .when b { display: block; font-size: 26px; letter-spacing: -.02em; }
+  .when span { font-size: 12.5px; color: var(--muted); }
+
+  .countdown { margin-top: 44px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.01)); padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 26px; align-items: center; justify-content: space-between; }
+  .cd-label { font-size: 12px; color: var(--muted); letter-spacing: .14em; text-transform: uppercase; }
+  .cd-nums { display: flex; gap: 20px; }
+  .cd-nums div { min-width: 62px; text-align: center; }
+  .cd-nums strong { display: block; font-size: 30px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.1; }
+  .cd-nums small { font-size: 10.5px; color: var(--muted); letter-spacing: .1em; }
+  .seats { font-size: 12px; color: var(--muted); }
+  .seats b { color: var(--amber); font-size: 15px; }
+
+  section { padding: 66px 0; border-top: 1px solid var(--line); margin-top: 46px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+  .sec-head h2 { margin: 0; font-size: 13px; letter-spacing: .26em; text-transform: uppercase; font-weight: 600; }
+  .sec-head span { font-size: 12px; color: var(--muted); }
+
+  .agenda { display: grid; gap: 0; }
+  .slot { display: grid; grid-template-columns: 104px 1fr auto; gap: 22px; padding: 18px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .slot:first-child { border-top: 1px solid var(--line); }
+  .slot time { font-size: 13px; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .slot h3 { margin: 0 0 4px; font-size: 16.5px; font-weight: 600; }
+  .slot p { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .slot .who { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .slot.break h3 { color: var(--muted); font-weight: 400; }
+
+  .speakers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .speaker { border: 1px solid var(--line); border-radius: 16px; padding: 20px 18px; background: var(--card); transition: transform .18s, border-color .18s; }
+  .speaker:hover { transform: translateY(-3px); border-color: rgba(242, 178, 74, .4); }
+  .avatar { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; font-weight: 700; color: #16110a; margin-bottom: 14px; }
+  .speaker h3 { margin: 0 0 3px; font-size: 14.5px; }
+  .speaker p { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+  .speaker span { display: block; margin-top: 10px; font-size: 11px; color: var(--amber); }
+
+  .venue { display: grid; grid-template-columns: 1fr .9fr; gap: 34px; align-items: center; }
+  .venue h3 { margin: 0 0 10px; font-size: 19px; }
+  .venue p { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+  .map { border: 1px solid var(--line); border-radius: 16px; background: #101216; overflow: hidden; }
+  .map svg { display: block; width: 100%; height: auto; }
+
+  .signup { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .signup h2 { margin: 0 0 12px; font-size: clamp(26px, 3.6vw, 38px); letter-spacing: -.03em; }
+  .signup > div > p { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 34ch; }
+  form { display: grid; gap: 14px; }
+  label.field { display: grid; gap: 7px; font-size: 12px; color: var(--muted); }
+  input, select {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px;
+    background: rgba(255,255,255,.04); color: var(--text); font: inherit; font-size: 13.5px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--amber); background: rgba(255,255,255,.07); }
+  input::placeholder { color: #6d7075; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .error { color: #ef9c86; font-size: 11.5px; min-height: 0; margin: -6px 0 0; }
+  button.submit {
+    margin-top: 4px; padding: 13px 20px; border: 0; border-radius: 10px; background: var(--amber);
+    color: #1a1409; font: inherit; font-weight: 650; font-size: 14px; cursor: pointer;
+    transition: background .16s, transform .16s;
+  }
+  button.submit:hover { background: #ffc76a; transform: translateY(-1px); }
+  .form-note { margin: 2px 0 0; font-size: 11px; color: #77797d; line-height: 1.6; }
+  .result { border: 1px solid rgba(242, 178, 74, .4); border-radius: 14px; padding: 22px; background: rgba(242, 178, 74, .07); }
+  .result strong { display: block; font-size: 15px; margin-bottom: 8px; }
+  .result p { margin: 0 0 6px; font-size: 12.5px; color: var(--muted); }
+  .result button { margin-top: 12px; padding: 8px 15px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--text); font: inherit; font-size: 12px; cursor: pointer; }
+
+  footer { padding: 30px 0 46px; border-top: 1px solid var(--line); }
+  .foot { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; font-size: 11.5px; color: #6f7276; }
+
+  @media (max-width: 900px) {
+    .hero-sub, .venue, .signup { grid-template-columns: 1fr; }
+    .when { text-align: left; }
+    .speakers { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .wrap { width: calc(100% - 40px); }
+    .slot { grid-template-columns: 76px 1fr; }
+    .slot .who { grid-column: 2; }
+    .cd-nums { gap: 12px; }
+    .row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <strong>夜行计划 / NIGHTWALK 05</strong>
+    <span>2027 年 3 月 21 日 · 杭州</span>
+    <a class="rsvp" href="#signup">立即报名</a>
+  </div>
+</div>
+
+<main>
+  <section class="hero wrap" style="border:0;margin-top:0">
+    <div class="kicker">城市夜谈 · 第 5 期 <span>/ 主题：夜里还亮着的生意</span></div>
+    <h1 class="serif">夜行<br><em>计划</em></h1>
+    <div class="hero-sub">
+      <p>一整晚，四个分享，两场圆桌。聊那些在白天看不见的城市：深夜食堂、24 小时书店、凌晨的物流站，以及为它们设计产品的人。</p>
+      <div class="when">
+        <b>03 / 21</b>
+        <span>周日 19:30 — 23:00 · 单向空间 2F</span>
+      </div>
+    </div>
+
+    <div class="countdown">
+      <div>
+        <span class="cd-label">距开场还有</span>
+      </div>
+      <div class="cd-nums" id="countdown" aria-live="off">
+        <div><strong data-unit="day">--</strong><small>天</small></div>
+        <div><strong data-unit="hour">--</strong><small>时</small></div>
+        <div><strong data-unit="min">--</strong><small>分</small></div>
+        <div><strong data-unit="sec">--</strong><small>秒</small></div>
+      </div>
+      <div class="seats">余位 <b id="seat-left">37</b> / 120 · 报名后收到入场二维码</div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="sec-head"><h2>当晚日程</h2><span>共 4 场分享 · 2 场圆桌</span></div>
+    <div class="agenda">
+      <div class="slot"><time>19:30</time><div><h3>开场：城市为什么需要夜晚</h3><p>从一张夜间灯光图讲起，聊聊夜间经济的真实密度。</p></div><span class="who">主持 · 沈知白</span></div>
+      <div class="slot"><time>19:50</time><div><h3>凌晨三点的物流站</h3><p>一条生鲜链路如何在 4 小时内跑完 60 公里。</p></div><span class="who">林舟 · 供应链</span></div>
+      <div class="slot"><time>20:30</time><div><h3>给夜班做的界面，不该照抄白天</h3><p>低亮度、单手操作与疲劳状态下的交互取舍。</p></div><span class="who">周砚 · 产品设计</span></div>
+      <div class="slot break"><time>21:10</time><div><h3>茶歇与自由交流</h3><p>现场提供热汤与手冲，建议自带杯子。</p></div><span class="who">20 分钟</span></div>
+      <div class="slot"><time>21:30</time><div><h3>圆桌：夜间的生意怎么算账</h3><p>人力、租金与客单价，三种夜晚业态的真实模型。</p></div><span class="who">4 位嘉宾</span></div>
+      <div class="slot"><time>22:20</time><div><h3>开放麦与收尾</h3><p>每人 2 分钟，讲一件你在夜里观察到的小事。</p></div><span class="who">全体</span></div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="sec-head"><h2>分享嘉宾</h2><span>来自零售、物流、设计与研究</span></div>
+    <div class="speakers">
+      <article class="speaker">
+        <div class="avatar" style="background:linear-gradient(140deg,#f2b24a,#f6d38c)">林</div>
+        <h3>林舟</h3><p>生鲜供应链负责人，跑过 200 个夜间站点。</p><span>19:50 分享</span>
+      </article>
+      <article class="speaker">
+        <div class="avatar" style="background:linear-gradient(140deg,#ef7a5a,#f5b3a1)">周</div>
+        <h3>周砚</h3><p>产品设计师，做过三款夜班作业系统。</p><span>20:30 分享</span>
+      </article>
+      <article class="speaker">
+        <div class="avatar" style="background:linear-gradient(140deg,#9fb8f0,#cfdcfa)">沈</div>
+        <h3>沈知白</h3><p>城市研究者，关注夜间灯光与人群流动。</p><span>19:30 开场</span>
+      </article>
+      <article class="speaker">
+        <div class="avatar" style="background:linear-gradient(140deg,#a8d8b9,#d3ecd9)">陈</div>
+        <h3>陈拾</h3><p>24 小时书店主理人，开了七年夜班。</p><span>21:30 圆桌</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="venue">
+      <div>
+        <h3>单向空间 · 2F 剧场</h3>
+        <p>杭州市拱墅区丽水路 58 号，远洋乐堤港 B 区</p>
+        <p>地铁 5 号线「大运河」站 C 口步行 6 分钟；现场无停车位，建议骑行或地铁。</p>
+        <p style="margin-top:14px;color:var(--amber);font-size:12.5px">19:00 开始签到，凭报名二维码入场。</p>
+      </div>
+      <div class="map" aria-hidden="true">
+        <svg viewBox="0 0 420 260">
+          <rect width="420" height="260" fill="#0f1115"/>
+          <g stroke="#1d2027" stroke-width="1">
+            <path d="M0 60h420M0 130h420M0 200h420M70 0v260M170 0v260M270 0v260M360 0v260"/>
+          </g>
+          <path d="M-10 190C60 176 96 140 170 138s120 34 180 12 90-10 100-6" stroke="#2b3a4a" stroke-width="12" fill="none" opacity=".8"/>
+          <path d="M40 20L120 110l60 40 90-14" stroke="#242a33" stroke-width="7" fill="none"/>
+          <circle cx="238" cy="120" r="26" fill="rgba(242,178,74,.12)"/>
+          <circle cx="238" cy="120" r="7" fill="#f2b24a"/>
+          <text x="238" y="96" fill="#e7e5df" font-size="11" text-anchor="middle" font-family="sans-serif">单向空间</text>
+          <text x="96" y="196" fill="#5e6b78" font-size="10" font-family="sans-serif">丽水路</text>
+          <text x="300" y="52" fill="#5e6b78" font-size="10" font-family="sans-serif">大运河站 C 口</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="signup">
+    <div class="signup">
+      <div>
+        <h2>留个位置给你。</h2>
+        <p>免费参加，需提前报名。现场提供热饮，座位先到先得。如果来不了，请提前一天告知，把位置留给别人。</p>
+      </div>
+      <div id="signup-slot">
+        <form id="rsvp-form" novalidate>
+          <div class="row">
+            <label class="field">你的称呼
+              <input name="name" type="text" placeholder="例如：小舟" maxlength="20" autocomplete="name">
+            </label>
+            <label class="field">邮箱
+              <input name="email" type="email" placeholder="you@example.com" maxlength="80" autocomplete="email">
+            </label>
+          </div>
+          <label class="field">职业方向
+            <select name="role">
+              <option value="">请选择</option>
+              <option>产品 / 设计</option>
+              <option>工程 / 数据</option>
+              <option>零售 / 运营</option>
+              <option>研究 / 媒体</option>
+              <option>其他</option>
+            </select>
+          </label>
+          <label class="field">想问嘉宾的问题（选填）
+            <input name="question" type="text" placeholder="例如：夜班的排班怎么做得更人性化？" maxlength="80">
+          </label>
+          <p class="error" id="form-error" role="alert"></p>
+          <button class="submit" type="submit">提交报名</button>
+          <p class="form-note">这是模板自带的示例表单，只在本页做校验，不会把信息发送到任何服务器；接入你自己的后端后即可真正收集报名。</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 夜行计划 · 本页为 Atoms Demo 模板示例，活动与嘉宾均为虚构</span>
+    <span>合作联系：night@nightwalk.studio</span>
+  </div>
+</footer>
+
+<script>
+  // 倒计时：以活动开始时间（东八区）为准，不在过去时显示已开场
+  var start = new Date('2027-03-21T19:30:00+08:00').getTime();
+  var units = {};
+  document.querySelectorAll('[data-unit]').forEach(function (node) { units[node.dataset.unit] = node; });
+  function pad(value) { return value < 10 ? '0' + value : String(value); }
+  function tick() {
+    var left = start - Date.now();
+    if (left <= 0) {
+      units.day.textContent = '00'; units.hour.textContent = '00';
+      units.min.textContent = '00'; units.sec.textContent = '00';
+      return;
+    }
+    var sec = Math.floor(left / 1000);
+    units.day.textContent = pad(Math.floor(sec / 86400));
+    units.hour.textContent = pad(Math.floor(sec % 86400 / 3600));
+    units.min.textContent = pad(Math.floor(sec % 3600 / 60));
+    units.sec.textContent = pad(sec % 60);
+    setTimeout(tick, 1000);
+  }
+  tick();
+
+  // 报名表单：本地校验 + 结果回显（不发起网络请求）
+  var form = document.getElementById('rsvp-form');
+  var error = document.getElementById('form-error');
+  var slot = document.getElementById('signup-slot');
+  var seatLeft = document.getElementById('seat-left');
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var data = new FormData(form);
+    var name = String(data.get('name') || '').trim();
+    var email = String(data.get('email') || '').trim();
+    var role = String(data.get('role') || '').trim();
+    if (name.length < 2) { error.textContent = '请填写至少 2 个字的称呼。'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { error.textContent = '邮箱格式看起来不对，请检查一下。'; return; }
+    if (!role) { error.textContent = '请选择你的职业方向，方便我们安排圆桌。'; return; }
+    error.textContent = '';
+
+    var left = Number(seatLeft.textContent);
+    if (left > 0) seatLeft.textContent = String(left - 1);
+
+    var result = document.createElement('div');
+    result.className = 'result';
+    result.setAttribute('role', 'status');
+    var title = document.createElement('strong');
+    title.textContent = name + '，位置已为你留好。';
+    var line1 = document.createElement('p');
+    line1.textContent = '3 月 21 日 19:30 · 单向空间 2F，签到后凭邮件里的编号入场。';
+    var line2 = document.createElement('p');
+    line2.textContent = '（示例表单：以上内容仅在本页显示，未发送到服务器。）';
+    var again = document.createElement('button');
+    again.type = 'button';
+    again.textContent = '再填一次';
+    again.addEventListener('click', function () {
+      slot.replaceChild(form, result);
+      form.reset();
+      form.querySelector('input[name="name"]').focus();
+    });
+    result.appendChild(title); result.appendChild(line1); result.appendChild(line2); result.appendChild(again);
+    slot.replaceChild(result, form);
+  });
+</script>
+<script>
+  // 模板悬停预览：带 ?peek=1 时整页缓慢上下巡游。
+  if (location.search.indexOf('peek=1') > -1) {
+    var y = 0, dir = 1;
+    (function step() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 60) {
+        y += dir * 0.7;
+        if (y > max) { y = max; dir = -1; }
+        if (y < 0) { y = 0; dir = 1; }
+        window.scrollTo(0, Math.round(y));
+      }
+      requestAnimationFrame(step);
+    })();
+  }
+</script>
+</body>
+</html>

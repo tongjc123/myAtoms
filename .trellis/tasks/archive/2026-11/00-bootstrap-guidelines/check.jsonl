@@ -1,0 +1,4 @@
+{"file":".trellis/spec/project-contract.md","reason":"Approved scope and evidence boundaries"}
+{"file":".trellis/spec/development-tooling.md","reason":"Actual local setup and task command contracts"}
+{"file":".trellis/spec/backend/index.md","reason":"Check backend conventions against actual code"}
+{"file":".trellis/spec/frontend/index.md","reason":"Check frontend conventions against actual code"}

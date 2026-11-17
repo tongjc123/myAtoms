@@ -1,0 +1,8 @@
+{"file":".trellis/spec/project-contract.md","reason":"Real content or explicit failure; no fake results; secrets stay server-side"}
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R20 templates, P08 template surface and R28 isolation requirements"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"versions/templates/preview_sessions entities, A5/A7 contracts and sandbox rules"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/template/TemplateSeeder.java","reason":"Immutable template versioning driven by content hash"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/template/TemplateService.java","reason":"Clone transaction and idempotent project creation"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/preview/PreviewController.java","reason":"Sandboxed read-only preview surface and CSP"}
+{"file":"apps/web/src/features/templates/TemplateGallery.tsx","reason":"Gallery filtering, deep link and dialog trigger"}
+{"file":"apps/web/src/features/templates/TemplateDialog.tsx","reason":"Play iframe, clone form, progress and error states"}

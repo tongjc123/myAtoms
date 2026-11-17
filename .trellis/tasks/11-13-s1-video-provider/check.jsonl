@@ -1,0 +1,4 @@
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R24 R25 R26 R28 constraints on provider use"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Prepared-vs-generated distinction and no fake progress"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/provider/ArkClientTest.java","reason":"Error mapping and key non-disclosure checks"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/SystemBoundaryTest.java","reason":"Provider endpoint hides secrets and stays closed when unconfigured"}

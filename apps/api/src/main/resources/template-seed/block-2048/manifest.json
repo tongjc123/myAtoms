@@ -1,0 +1,14 @@
+{
+  "slug": "block-2048",
+  "name": "霓虹方块",
+  "type": "GAME",
+  "category": "解谜与卡牌",
+  "summary": "相同数字碰撞合并，一路合成到 2048。",
+  "description": "经典 2048 的霓虹重制版。方向键或滑动移动方块，相同数字相撞合并并累加得分；填满棋盘且无法移动时结束，合成 2048 后仍可继续挑战更高分。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "cover": "cover.svg",
+  "sortOrder": 40,
+  "files": ["index.html", "cover.svg"]
+}

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="星海防线封面">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#050a18"/><stop offset="0.6" stop-color="#07182e"/><stop offset="1" stop-color="#04202c"/>
+    </linearGradient>
+    <radialGradient id="nebula" cx="0.55" cy="0.32" r="0.6">
+      <stop offset="0" stop-color="#2f6bd8" stop-opacity="0.5"/><stop offset="1" stop-color="#050a18" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ship" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#35e0c8"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#8ff6ff"/><stop offset="1" stop-color="#35e0c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <rect width="1200" height="675" fill="url(#nebula)"/>
+  <g fill="#bfe9ff">
+    <circle cx="120" cy="90" r="2" opacity="0.8"/><circle cx="300" cy="180" r="1.6" opacity="0.6"/>
+    <circle cx="520" cy="70" r="2.2" opacity="0.9"/><circle cx="760" cy="140" r="1.5" opacity="0.5"/>
+    <circle cx="980" cy="80" r="2" opacity="0.7"/><circle cx="1120" cy="220" r="1.4" opacity="0.6"/>
+    <circle cx="200" cy="320" r="1.5" opacity="0.45"/><circle cx="880" cy="300" r="1.8" opacity="0.5"/>
+    <circle cx="1050" cy="430" r="2" opacity="0.55"/><circle cx="420" cy="470" r="1.4" opacity="0.4"/>
+    <circle cx="640" cy="250" r="1.6" opacity="0.5"/><circle cx="80" cy="500" r="1.8" opacity="0.4"/>
+  </g>
+  <g opacity="0.85">
+    <polygon points="300,140 322,182 278,182" fill="#ff5f7a"/>
+    <polygon points="980,190 1006,238 954,238" fill="#ff5f7a" opacity="0.8"/>
+    <polygon points="150,380 172,422 128,422" fill="#ffb648" opacity="0.7"/>
+    <polygon points="1080,340 1108,390 1052,390" fill="#ffb648" opacity="0.6"/>
+  </g>
+  <g transform="translate(600 430)">
+    <path d="M0 -95 L52 62 L0 26 L-52 62 Z" fill="url(#ship)"/>
+    <path d="M0 -48 L24 36 L0 16 L-24 36 Z" fill="#37a5ff" opacity="0.9"/>
+    <path d="M-16 52 L16 52 L0 130 Z" fill="#8ff6ff" opacity="0.55"/>
+  </g>
+  <g stroke="#8ff6ff" stroke-width="6" stroke-linecap="round" opacity="0.8">
+    <line x1="470" y1="250" x2="470" y2="170"/><line x1="730" y1="280" x2="730" y2="200"/>
+  </g>
+  <g transform="translate(80 552)">
+    <text font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="72" font-weight="800" fill="url(#title)" letter-spacing="6">星海防线</text>
+    <text y="44" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" fill="#7f9bbf" letter-spacing="10">STELLAR DEFENSE</text>
+  </g>
+</svg>

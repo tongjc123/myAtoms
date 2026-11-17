@@ -1,0 +1,60 @@
+{
+  "title": "在约束里做设计",
+  "theme": "editorial",
+  "brand": { "name": "Selected Works" },
+  "slides": [
+    {
+      "layout": "cover",
+      "kicker": "PORTFOLIO 2023 — 2026",
+      "title": "在约束里做设计",
+      "subtitle": "品牌识别与界面作品选，共六个项目",
+      "meta": ["上海", "2026"]
+    },
+    {
+      "layout": "statement",
+      "text": "限制不是敌人。预算、时间与既有系统，往往决定了设计最终能不能被用起来。"
+    },
+    {
+      "layout": "section",
+      "index": "01",
+      "title": "品牌识别",
+      "subtitle": "从字形到系统"
+    },
+    {
+      "layout": "bullets",
+      "kicker": "01",
+      "title": "品牌识别",
+      "bullets": [
+        "为三家早期公司建立从标志到动效的完整识别系统",
+        "统一的字阶与栅格，让设计能被人接着做下去",
+        "交付包含 Figma 组件库与一份可执行的品牌手册"
+      ]
+    },
+    {
+      "layout": "quote",
+      "quote": "好的识别不是被记住，而是被正确使用。",
+      "attribution": "品牌手册 · 序言"
+    },
+    {
+      "layout": "section",
+      "index": "02",
+      "title": "界面与体验",
+      "subtitle": "把复杂收进结构里"
+    },
+    {
+      "layout": "bullets",
+      "kicker": "02",
+      "title": "界面与体验",
+      "bullets": [
+        "重做数据产品的信息架构，任务完成时间下降 38%",
+        "把七个后台模块收敛成三个工作区，导航层级从四层降到两层",
+        "移动端首屏加载从 3.4 秒降到 1.2 秒"
+      ]
+    },
+    {
+      "layout": "closing",
+      "title": "合作与联系",
+      "subtitle": "hello@example.com · 上海"
+    }
+  ]
+}

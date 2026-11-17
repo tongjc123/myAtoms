@@ -1,0 +1,5 @@
+{"file": "apps/api/src/test/java/com/deepwistom/atoms/SlidesRunApiTest.java", "reason": "T02/T13/T16 evidence: success path, monotonic event log, cancel publishes nothing, import validation"}
+{"file": "apps/api/src/main/resources/slide-engine/deck.css", "reason": "Cover title size ladder and peek-mode stage geometry"}
+{"file": "apps/web/src/features/templates/useHoverPeek.ts", "reason": "Intent delay and teardown rule for the carousel iframe; moved here so the web gallery shares it"}
+{"file": ".cache/slides-check.mjs", "reason": "Headless browser walkthrough: gallery, peek, chip, streaming, artifact, preview, fullscreen"}
+{"file": ".trellis/tasks/11-15-s1-slides-workbench/evidence/05-complete.png", "reason": "Screenshots captured from the walkthrough above"}

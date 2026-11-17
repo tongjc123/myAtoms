@@ -1,0 +1,4 @@
+{"file":"Atoms-Demo-产品需求文档.md","reason":"T20 acceptance: template creates an independent project and templates stay untouched"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Immutability of successful versions and one-preview-token-per-project rule"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/TemplateApiTest.java","reason":"Catalogue, traversal, mutation guards, clone idempotency and isolation"}
+{"file":"scripts/check-projects-browser.mjs","reason":"Existing browser check harness pattern"}

@@ -1,0 +1,13 @@
+{
+  "slug": "web-portfolio-minimal",
+  "name": "极简个人作品集",
+  "type": "WEB",
+  "category": "作品集",
+  "summary": "米白纸感的一页式作品集，作品筛选、经历与联系方式都已排好。",
+  "description": "适合设计师、独立开发者与摄影师的个人主页：大字标题建立第一印象，作品列表可按方向筛选，关于与联系方式收在页面末尾。单文件、响应式，改文案和配色即可上线，不需要构建工具。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "sortOrder": 10,
+  "files": ["index.html"]
+}

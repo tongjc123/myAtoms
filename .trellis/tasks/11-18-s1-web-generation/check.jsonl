@@ -1,0 +1,5 @@
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/WebRunApiTest.java","reason":"New WEB pipeline cases: stub provider success, external-asset rejection, unactivated model failure"}
+{"file":"apps/api/src/test/java/com/deepwistom/atoms/WebBudgetApiTest.java","reason":"Budget reservation happens before the first paid chat call and refuses the run when exhausted"}
+{"file":"apps/web/src/features/projects/ProjectDetail.tsx","reason":"Web projects expose a working 开始生成网页 button plus model readiness next to it"}
+{"file":"Atoms-Demo-实现设计文档.md","reason":"Section 5.1.2 and the provider revision record what the single-file pipeline does and still misses"}
+{"file":".trellis/tasks/11-18-s1-web-generation/implement.md","reason":"Verification log: 45 backend tests, tsc/build, headless walkthrough with screenshots"}

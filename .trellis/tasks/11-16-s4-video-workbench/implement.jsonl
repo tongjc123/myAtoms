@@ -1,0 +1,8 @@
+{"file":".trellis/spec/project-contract.md","reason":"Real generation or explicit failure; secrets stay server-side; no fabricated media"}
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R24 text-to-video, R25 asynchronous job tracking, R26 budget ceiling"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/run/RunService.java","reason":"Video pipeline: submission, polling, cancellation, download and version commit"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/video/VideoCatalog.java","reason":"Server-driven model catalog and spec validation shared by API and UI"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/video/BudgetService.java","reason":"Reserve/settle/release before any paid provider call"}
+{"file":"apps/api/src/main/java/com/deepwistom/atoms/preview/PreviewController.java","reason":"Byte-range media responses so the player can seek"}
+{"file":"apps/web/src/features/video/VideoComposer.tsx","reason":"Model menu, ratio/resolution/duration popover and submit flow"}
+{"file":"apps/web/src/features/chat/ChatPage.tsx","reason":"Video artifact card, preview panel, failed-step rendering"}

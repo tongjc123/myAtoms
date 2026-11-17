@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>云端跳跃</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #071722; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; color: #eafcff; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hud { position: fixed; inset: 14px 18px auto 18px; display: flex; gap: 26px; pointer-events: none; }
+  .hud span { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: #6fa5b8; }
+  .hud b { display: block; font-size: 24px; color: #eafcff; font-variant-numeric: tabular-nums; }
+  .hud .right { margin-left: auto; text-align: right; }
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 40%, rgba(10,50,70,.5), rgba(4,12,20,.93)); }
+  .overlay[hidden] { display: none; }
+  .panel { width: min(520px, 100%); text-align: center; }
+  .kicker { font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: #58c0d8; }
+  h1 { margin: 10px 0 6px; font-size: clamp(30px, 6vw, 46px); letter-spacing: .1em; font-weight: 800;
+       background: linear-gradient(180deg, #ffffff, #9ff6d0 55%, #3ad6ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { margin: 0 0 22px; font-size: 14px; color: #9dc4d4; letter-spacing: .06em; }
+  .keys { display: grid; gap: 8px; margin: 0 auto 24px; max-width: 360px; font-size: 13px; color: #9dc4d4; }
+  .keys div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #123243; padding-bottom: 6px; }
+  kbd { font: inherit; padding: 2px 8px; border-radius: 5px; background: #0d2231; border: 1px solid #1d4356; color: #d8fbff; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 999px; padding: 13px 34px; font-weight: 600; letter-spacing: .08em;
+           background: linear-gradient(135deg, #9ff6d0, #3ad6ff); color: #04202a; box-shadow: 0 10px 30px rgba(58,214,255,.25); }
+  button:hover { filter: brightness(1.08); }
+  button:focus-visible { outline: 2px solid #c6fbff; outline-offset: 3px; }
+  .score-line { margin: 0 0 18px; font-size: 13px; color: #9dc4d4; }
+  .score-line strong { display: block; margin-top: 4px; font-size: 42px; color: #eafcff; font-variant-numeric: tabular-nums; }
+  .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 11px; letter-spacing: .18em; color: #265468; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="hud">
+  <div><span>高度</span><b id="height">0 m</b></div>
+  <div><span>平台</span><b id="steps">0</b></div>
+  <div class="right"><span>得分</span><b id="score">0</b></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <p class="kicker">Sky Hopper</p>
+    <h1>云端跳跃</h1>
+    <p class="tagline" id="tagline">一直往上跳，别回头看下面。</p>
+    <div class="score-line" id="scoreLine" hidden>本次高度<strong id="finalScore">0</strong></div>
+    <div class="keys" id="keys">
+      <div><span>左右移动</span><span><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> / 拖动</span></div>
+      <div><span>自动弹跳</span><span>踩到平台就跳</span></div>
+      <div><span>弹簧平台</span><span>绿色 · 跳更高</span></div>
+    </div>
+    <button id="action">开始攀爬</button>
+  </div>
+</div>
+<div class="hint">云端跳跃 · 平台自研示例</div>
+<script>
+(function () {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const action = document.getElementById('action');
+  const heightEl = document.getElementById('height');
+  const stepsEl = document.getElementById('steps');
+  const scoreEl = document.getElementById('score');
+  const taglineEl = document.getElementById('tagline');
+  const scoreLine = document.getElementById('scoreLine');
+  const finalScore = document.getElementById('finalScore');
+  const keys = document.getElementById('keys');
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  let W = 0, H = 0, DPR = 1;
+  const GRAVITY = 1750, JUMP = -760, SPRING = -1130, MOVE = 330;
+  const state = { mode: 'title', camera: 0, startY: 0, topY: 0, best: 0, steps: 0, time: 0 };
+  const player = { x: 0, y: 0, w: 30, h: 38, vx: 0, vy: 0 };
+  let platforms = [], clouds = [], trail = [];
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    player.w = clamp(W * 0.045, 26, 38);
+    player.h = player.w * 1.22;
+    clouds = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: Math.random() * H, s: rand(40, 130), speed: rand(6, 20), alpha: rand(0.04, 0.12) }));
+    if (state.mode === 'title') { player.x = W / 2; }
+  }
+
+  function makePlatform(y, forcedType) {
+    const width = rand(64, 112);
+    const type = forcedType || (Math.random() < 0.1 ? 'spring' : (y < -900 && Math.random() < 0.26 ? 'moving' : 'normal'));
+    return { x: rand(10, Math.max(12, W - width - 10)), y, w: width, h: 13, type, vx: type === 'moving' ? rand(40, 90) * (Math.random() < 0.5 ? -1 : 1) : 0, phase: Math.random() * 6 };
+  }
+
+  function reset() {
+    state.camera = 0; state.steps = 0; state.time = 0;
+    player.x = W / 2; player.y = H * 0.42; player.vx = 0; player.vy = 0;
+    state.startY = player.y;
+    state.topY = player.y - 180;
+    platforms = [{ x: W / 2 - 55, y: player.y + 96, w: 110, h: 13, type: 'normal', vx: 0, phase: 0 }];
+    for (let index = 0; index < 12; index++) {
+      state.topY -= rand(78, 118);
+      platforms.push(makePlatform(state.topY));
+    }
+    trail = [];
+    heightEl.textContent = '0 m'; stepsEl.textContent = '0'; scoreEl.textContent = '0';
+  }
+
+  function start() { reset(); state.mode = 'playing'; overlay.hidden = true; }
+
+  function gameOver() {
+    state.mode = 'over';
+    overlay.hidden = false;
+    taglineEl.textContent = '掉下去了。云层下面还有云层。';
+    scoreLine.hidden = false;
+    finalScore.textContent = Math.round(state.best) + ' m';
+    keys.hidden = true;
+    action.textContent = '再爬一次';
+  }
+
+  function update(dt) {
+    state.time += dt;
+    for (const cloud of clouds) {
+      cloud.x += cloud.speed * dt;
+      if (cloud.x - cloud.s > W) cloud.x = -cloud.s;
+    }
+    if (state.mode !== 'playing') return;
+
+    let direction = 0;
+    if (pressedLeft()) direction -= 1;
+    if (pressedRight()) direction += 1;
+    player.vx = direction * MOVE;
+
+    const previousBottom = player.y + player.h / 2;
+    player.y += player.vy * dt;
+    player.x += player.vx * dt;
+    player.vy += GRAVITY * dt;
+    if (player.x < -player.w) player.x = W + player.w;
+    if (player.x > W + player.w) player.x = -player.w;
+
+    const bottom = player.y + player.h / 2;
+    if (player.vy > 0) {
+      for (const platform of platforms) {
+        if (player.x + player.w * 0.32 < platform.x || player.x - player.w * 0.32 > platform.x + platform.w) continue;
+        if (previousBottom <= platform.y + 2 && bottom >= platform.y && bottom <= platform.y + platform.h + 12) {
+          player.vy = platform.type === 'spring' ? SPRING : JUMP;
+          player.y = platform.y - player.h / 2;
+          state.steps += 1;
+          stepsEl.textContent = state.steps;
+          for (let index = 0; index < 8; index++) {
+            trail.push({ x: player.x + rand(-12, 12), y: player.y + player.h / 2, vx: rand(-60, 60), vy: rand(-30, 90), life: 0.45, color: platform.type === 'spring' ? '#9ff6d0' : '#7fd8ff' });
+          }
+          break;
+        }
+      }
+    }
+
+    for (const platform of platforms) {
+      if (platform.type === 'moving') {
+        platform.x += platform.vx * dt;
+        if (platform.x < 6 || platform.x + platform.w > W - 6) platform.vx *= -1;
+      }
+    }
+
+    state.camera = Math.min(state.camera, player.y - H * 0.56);
+
+    for (let index = platforms.length - 1; index >= 0; index--) {
+      if (platforms[index].y - state.camera > H + 140) platforms.splice(index, 1);
+    }
+    while (state.topY > state.camera - H * 0.6) {
+      state.topY -= rand(78, 126);
+      platforms.push(makePlatform(state.topY));
+    }
+
+    const climbed = Math.max(0, (state.startY - player.y) / 12);
+    state.best = Math.max(state.best, climbed);
+    heightEl.textContent = Math.round(climbed) + ' m';
+    scoreEl.textContent = Math.round(climbed * 2 + state.steps * 5);
+
+    for (const particle of trail) {
+      particle.x += particle.vx * dt; particle.y += particle.vy * dt; particle.life -= dt;
+    }
+    trail = trail.filter((particle) => particle.life > 0);
+
+    if (player.y - state.camera > H + 90) gameOver();
+  }
+
+  const pressed = new Set();
+  const pressedLeft = () => pressed.has('ArrowLeft') || pressed.has('a');
+  const pressedRight = () => pressed.has('ArrowRight') || pressed.has('d');
+
+  function draw() {
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#04121c'); sky.addColorStop(0.45, '#0a2b3d'); sky.addColorStop(1, '#0f4154');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    const glow = ctx.createRadialGradient(W * 0.5, H * 0.85, 0, W * 0.5, H * 0.85, H);
+    glow.addColorStop(0, 'rgba(58,214,255,.18)'); glow.addColorStop(1, 'rgba(4,18,28,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+    for (const cloud of clouds) {
+      ctx.globalAlpha = cloud.alpha;
+      ctx.fillStyle = '#c8f4ff';
+      const y = ((cloud.y - state.camera * 0.12) % (H + 200) + H + 200) % (H + 200) - 100;
+      ctx.beginPath();
+      ctx.ellipse(cloud.x, y, cloud.s, cloud.s * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cloud.x + cloud.s * 0.45, y - cloud.s * 0.12, cloud.s * 0.55, cloud.s * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    for (const platform of platforms) {
+      const y = platform.y - state.camera;
+      if (y < -30 || y > H + 30) continue;
+      ctx.save();
+      if (platform.type === 'spring') {
+        ctx.shadowColor = '#9ff6d0'; ctx.shadowBlur = 18; ctx.fillStyle = '#9ff6d0';
+      } else if (platform.type === 'moving') {
+        ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 16; ctx.fillStyle = '#ffd166';
+      } else {
+        ctx.shadowColor = '#3ad6ff'; ctx.shadowBlur = 14; ctx.fillStyle = '#4fb6e0';
+      }
+      ctx.beginPath(); ctx.roundRect(platform.x, y, platform.w, platform.h, 7); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.beginPath(); ctx.roundRect(platform.x + 6, y + 3, platform.w - 12, 2.5, 2); ctx.fill();
+      ctx.restore();
+    }
+
+    for (const particle of trail) {
+      ctx.globalAlpha = Math.max(0, particle.life * 2);
+      ctx.fillStyle = particle.color;
+      ctx.fillRect(particle.x, particle.y - state.camera, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+
+    if (state.mode === 'playing' || state.mode === 'over') {
+      const px = player.x, py = player.y - state.camera;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.shadowColor = '#9ff6d0'; ctx.shadowBlur = 22;
+      const body = ctx.createLinearGradient(0, -player.h / 2, 0, player.h / 2);
+      body.addColorStop(0, '#ffffff'); body.addColorStop(0.55, '#9ff6d0'); body.addColorStop(1, '#3ad6ff');
+      ctx.fillStyle = body;
+      ctx.beginPath(); ctx.roundRect(-player.w / 2, -player.h / 2, player.w, player.h, player.w * 0.36); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#062430';
+      const eyeY = -player.h * 0.12;
+      ctx.beginPath(); ctx.arc(-player.w * 0.16, eyeY, player.w * 0.09, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(player.w * 0.16, eyeY, player.w * 0.09, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#062430'; ctx.lineWidth = 2; ctx.beginPath();
+      ctx.arc(0, player.h * 0.16, player.w * 0.2, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowLeft', 'ArrowRight', 'a', 'd', ' '].includes(event.key)) event.preventDefault();
+    pressed.add(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+    if ((event.key === ' ' || event.key === 'Enter') && state.mode !== 'playing') start();
+  });
+  window.addEventListener('keyup', (event) => pressed.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+
+  let dragging = false;
+  canvas.addEventListener('pointerdown', (event) => {
+    if (state.mode !== 'playing') { start(); return; }
+    dragging = true;
+    player.x = event.clientX;
+  });
+  canvas.addEventListener('pointermove', (event) => { if (dragging) player.x = event.clientX; });
+  canvas.addEventListener('pointerup', () => { dragging = false; });
+  action.addEventListener('click', start);
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

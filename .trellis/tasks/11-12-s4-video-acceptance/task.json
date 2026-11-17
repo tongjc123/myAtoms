@@ -1,0 +1,28 @@
+{
+  "id": "s4-video-acceptance",
+  "name": "s4-video-acceptance",
+  "title": "S4 video and public acceptance",
+  "description": "Text/image-to-video, durable asynchronous jobs, budget controls and R01-R28 acceptance; depends on S3.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P0",
+  "creator": "admin",
+  "assignee": "admin",
+  "createdAt": "2026-11-12",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "11-16-s4-video-workbench"
+  ],
+  "parent": "11-12-atoms-demo-v3",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

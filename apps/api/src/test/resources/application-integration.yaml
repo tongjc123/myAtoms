@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${ATOMS_TEST_DB_URL}
+    username: ${ATOMS_TEST_DB_USER}
+    password: ${ATOMS_TEST_DB_PASSWORD}
+atoms:
+  cookie-secure: false
+  allowed-origins: http://127.0.0.1:5173

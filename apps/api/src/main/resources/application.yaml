@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: atoms-demo-api
+  datasource:
+    url: ${ATOMS_DB_URL}
+    username: ${ATOMS_DB_USER}
+    password: ${ATOMS_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 8
+      connection-timeout: 5000
+  flyway:
+    clean-disabled: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 9MB
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+    datatype:
+      enum:
+        fail-on-numbers-for-enums: true
+atoms:
+  allowed-origins: ${ATOMS_ALLOWED_ORIGINS:http://127.0.0.1:5173,http://localhost:5173}
+  cookie-secure: ${ATOMS_COOKIE_SECURE:true}
+  preview:
+    ttl: ${ATOMS_PREVIEW_TTL:PT30M}
+  provider:
+    api-key: ${ATOMS_ARK_API_KEY:}
+    base-url: ${ATOMS_ARK_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}
+    video-model: ${ATOMS_ARK_VIDEO_MODEL:}
+    default-duration-seconds: ${ATOMS_VIDEO_DURATION:5}
+    default-resolution: ${ATOMS_VIDEO_RESOLUTION:720p}
+    default-ratio: ${ATOMS_VIDEO_RATIO:16:9}
+    generate-audio: ${ATOMS_VIDEO_AUDIO:false}
+    video-timeout: ${ATOMS_ARK_VIDEO_TIMEOUT:10m}
+    poll-interval: ${ATOMS_ARK_POLL_INTERVAL:3s}
+    allow-private-media-hosts: ${ATOMS_ARK_ALLOW_PRIVATE_MEDIA:false}
+    video-models:
+      - "seedance-2-0|Seedance 2.0|用于视觉叙事的多镜头视频。|${ATOMS_ARK_VIDEO_MODEL:}|"
+      - "seedance-2-5|Seedance 2.5|通过提示词和参考素材创作视频。|${ATOMS_ARK_VIDEO_MODEL_25:}|热门"
+      - "wan-3-0|Wan 3.0|通过文本或图像创作视频。|${ATOMS_ARK_VIDEO_MODEL_WAN:}|"
+    connect-timeout: ${ATOMS_ARK_CONNECT_TIMEOUT:5s}
+    request-timeout: ${ATOMS_ARK_REQUEST_TIMEOUT:30s}
+  qwen:
+    api-key: ${ATOMS_QWEN_API_KEY:}
+    base-url: ${ATOMS_QWEN_BASE_URL:https://cn-beijing.maas.qianwenaiapi.com/api/v1}
+    text-model: ${ATOMS_QWEN_TEXT_MODEL:}
+    text-model-name: ${ATOMS_QWEN_TEXT_MODEL_NAME:}
+    image-model: ${ATOMS_QWEN_IMAGE_MODEL:}
+    text-timeout: ${ATOMS_QWEN_TEXT_TIMEOUT:120s}
+    image-timeout: ${ATOMS_QWEN_IMAGE_TIMEOUT:120s}
+    connect-timeout: ${ATOMS_QWEN_CONNECT_TIMEOUT:5s}
+    request-timeout: ${ATOMS_QWEN_REQUEST_TIMEOUT:30s}
+    allow-private-media-hosts: ${ATOMS_QWEN_ALLOW_PRIVATE_MEDIA:false}
+  budget:
+    limit-cny: ${ATOMS_BUDGET_LIMIT_CNY:300.00}
+    video-reserve-cny: ${ATOMS_VIDEO_RESERVE_CNY:6.00}
+    text-reserve-cny: ${ATOMS_TEXT_RESERVE_CNY:1.00}
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

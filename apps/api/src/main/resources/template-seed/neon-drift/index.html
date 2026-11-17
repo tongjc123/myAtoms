@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>霓虹疾驰</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0413; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; color: #ffe9ff; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hud { position: fixed; inset: 14px 18px auto 18px; display: flex; align-items: flex-start; gap: 24px; pointer-events: none; }
+  .hud span { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: #a06fbe; }
+  .hud b { display: block; font-size: 24px; letter-spacing: .02em; color: #ffe9ff; font-variant-numeric: tabular-nums; }
+  .hud .right { margin-left: auto; text-align: right; }
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 40%, rgba(40,6,60,.55), rgba(6,2,12,.94)); transition: opacity .18s ease; }
+  .overlay[hidden] { display: none; }
+  .panel { width: min(520px, 100%); text-align: center; }
+  .kicker { font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: #b06fd0; }
+  h1 { margin: 10px 0 6px; font-size: clamp(30px, 6vw, 46px); letter-spacing: .08em; font-weight: 800;
+       background: linear-gradient(180deg, #ffffff, #ff7be0 50%, #7b5bff); -webkit-background-clip: text; background-clip: text; color: transparent;
+       text-shadow: 0 0 40px rgba(255,123,224,.25); }
+  .tagline { margin: 0 0 22px; font-size: 14px; color: #c79ad8; letter-spacing: .06em; }
+  .keys { display: grid; gap: 8px; margin: 0 auto 24px; max-width: 360px; font-size: 13px; color: #c0a4cf; }
+  .keys div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #34194a; padding-bottom: 6px; }
+  kbd { font: inherit; padding: 2px 8px; border-radius: 5px; background: #1e0d2c; border: 1px solid #45235f; color: #ffd6fb; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 999px; padding: 13px 34px; font-weight: 600; letter-spacing: .08em;
+           background: linear-gradient(135deg, #ff7be0, #7b5bff); color: #170324; box-shadow: 0 10px 30px rgba(255,123,224,.28); }
+  button:hover { filter: brightness(1.08); }
+  button:focus-visible { outline: 2px solid #ffb8f2; outline-offset: 3px; }
+  .score-line { margin: 0 0 18px; font-size: 13px; color: #c79ad8; }
+  .score-line strong { display: block; margin-top: 4px; font-size: 42px; color: #ffe9ff; font-variant-numeric: tabular-nums; }
+  .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 11px; letter-spacing: .18em; color: #4a2a60; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="hud">
+  <div><span>距离</span><b id="distance">0 m</b></div>
+  <div><span>时速</span><b id="speed">0</b></div>
+  <div class="right"><span>得分</span><b id="score">0</b></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <p class="kicker">Neon Drift</p>
+    <h1>霓虹疾驰</h1>
+    <p class="tagline" id="tagline">车流不会等你，换道要果断。</p>
+    <div class="score-line" id="scoreLine" hidden>本次成绩<strong id="finalScore">0</strong></div>
+    <div class="keys" id="keys">
+      <div><span>切换车道</span><span><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> / 拖动</span></div>
+      <div><span>拾取能量</span><span>蓝色电池 +80</span></div>
+      <div><span>开始</span><span><kbd>空格</kbd> 或点击</span></div>
+    </div>
+    <button id="action">上路</button>
+  </div>
+</div>
+<div class="hint">霓虹疾驰 · 平台自研示例</div>
+<script>
+(function () {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const action = document.getElementById('action');
+  const distanceEl = document.getElementById('distance');
+  const speedEl = document.getElementById('speed');
+  const scoreEl = document.getElementById('score');
+  const taglineEl = document.getElementById('tagline');
+  const scoreLine = document.getElementById('scoreLine');
+  const finalScore = document.getElementById('finalScore');
+  const keys = document.getElementById('keys');
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const laneColors = ['#ff5fd2', '#5fe0ff', '#ffd166', '#9d7bff'];
+
+  let W = 0, H = 0, DPR = 1, roadLeft = 0, roadWidth = 0, laneWidth = 0;
+  const state = { mode: 'title', score: 0, distance: 0, speed: 0, time: 0, spawn: 0.8, shake: 0, flash: 0 };
+  const player = { lane: 1, x: 0, y: 0, w: 44, h: 74, tilt: 0 };
+  let traffic = [], pickups = [], sparks = [], streaks = [];
+
+  function laneX(lane) { return roadLeft + laneWidth * (lane + 0.5); }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    roadWidth = Math.min(W * 0.82, 560);
+    roadLeft = (W - roadWidth) / 2;
+    laneWidth = roadWidth / 3;
+    player.y = H - Math.max(96, H * 0.2);
+    player.w = clamp(laneWidth * 0.52, 30, 54);
+    player.h = player.w * 1.65;
+    player.x = laneX(player.lane);
+    streaks = Array.from({ length: 46 }, () => ({ x: rand(roadLeft, roadLeft + roadWidth), y: Math.random() * H, len: rand(20, 90), speed: rand(0.6, 1.6) }));
+  }
+
+  function reset() {
+    state.score = 0; state.distance = 0; state.speed = 250; state.time = 0; state.spawn = 0.9; state.shake = 0; state.flash = 0;
+    traffic = []; pickups = []; sparks = [];
+    player.lane = 1; player.x = laneX(1); player.tilt = 0;
+    distanceEl.textContent = '0 m'; speedEl.textContent = '0'; scoreEl.textContent = '0';
+  }
+
+  function start() { reset(); state.mode = 'playing'; overlay.hidden = true; }
+
+  function gameOver() {
+    state.mode = 'over';
+    overlay.hidden = false;
+    taglineEl.textContent = '撞上了。速度是诱惑，也是代价。';
+    scoreLine.hidden = false;
+    finalScore.textContent = Math.round(state.score);
+    keys.hidden = true;
+    action.textContent = '再来一次';
+  }
+
+  function moveLane(direction) {
+    if (state.mode !== 'playing') return;
+    const next = clamp(player.lane + direction, 0, 2);
+    if (next !== player.lane) { player.lane = next; player.tilt = direction * 0.5; }
+  }
+
+  function spawnTraffic() {
+    const lane = Math.floor(Math.random() * 3);
+    const busy = traffic.some((car) => car.lane === lane && car.y < 120);
+    if (busy) return;
+    traffic.push({
+      lane, x: laneX(lane), y: -90, w: player.w * rand(0.9, 1.12), h: player.h * rand(0.9, 1.15),
+      color: laneColors[Math.floor(Math.random() * laneColors.length)], drift: rand(-1, 1) * 10,
+    });
+    if (Math.random() < 0.28) {
+      const free = [0, 1, 2].filter((value) => value !== lane);
+      const pickupLane = free[Math.floor(Math.random() * free.length)];
+      pickups.push({ lane: pickupLane, x: laneX(pickupLane), y: -140, r: 11, spin: 0 });
+    }
+  }
+
+  function crash(car) {
+    state.mode = 'over';
+    state.shake = 0.8;
+    state.flash = 0.5;
+    for (let index = 0; index < 40; index++) {
+      const angle = Math.random() * Math.PI * 2;
+      sparks.push({ x: car.x, y: car.y, vx: Math.cos(angle) * rand(40, 340), vy: Math.sin(angle) * rand(40, 340), life: rand(0.3, 0.9), color: index % 3 ? '#ffcf6b' : '#ff5fd2' });
+    }
+    window.setTimeout(() => { if (state.mode === 'over') gameOver(); }, 420);
+  }
+
+  function update(dt) {
+    state.time += dt;
+    if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 1.5);
+    if (state.flash > 0) state.flash = Math.max(0, state.flash - dt * 1.6);
+
+    for (const streak of streaks) {
+      streak.y += (state.mode === 'playing' ? state.speed * 1.7 : 120) * streak.speed * dt;
+      if (streak.y > H) { streak.y = -streak.len; streak.x = rand(roadLeft, roadLeft + roadWidth); }
+    }
+
+    player.x += (laneX(player.lane) - player.x) * Math.min(1, dt * 12);
+    player.tilt *= 0.9;
+    if (state.mode !== 'playing') return;
+
+    state.speed = Math.min(760, state.speed + dt * 16);
+    const relative = state.speed * 1.55;
+    state.distance += state.speed * dt * 0.06;
+    state.score += state.speed * dt * 0.05;
+
+    state.spawn -= dt;
+    if (state.spawn <= 0) { spawnTraffic(); state.spawn = Math.max(0.3, 1.05 - state.speed / 1100) * rand(0.7, 1.4); }
+
+    for (const car of traffic) {
+      car.y += relative * dt;
+      car.x = laneX(car.lane) + Math.sin(state.time * 2 + car.lane) * car.drift;
+    }
+    traffic = traffic.filter((car) => car.y < H + 130);
+
+    for (const pickup of pickups) {
+      pickup.y += relative * dt;
+      pickup.spin += dt * 6;
+    }
+    pickups = pickups.filter((pickup) => pickup.y < H + 40);
+
+    const px = player.x, py = player.y;
+    const overlapX = (a, b) => Math.abs(a.x - b.x) < (a.w + b.w) * 0.42;
+    const overlapY = (a, b) => Math.abs(a.y - b.y) < (a.h + b.h) * 0.44;
+    for (const car of traffic) {
+      if (overlapX(player, car) && overlapY(player, car)) { crash(car); return; }
+    }
+    for (let index = pickups.length - 1; index >= 0; index--) {
+      const pickup = pickups[index];
+      if (Math.abs(pickup.x - px) < pickup.r + player.w * 0.4 && Math.abs(pickup.y - py) < pickup.r + player.h * 0.4) {
+        pickups.splice(index, 1);
+        state.score += 80;
+        for (let particle = 0; particle < 14; particle++) {
+          const angle = Math.random() * Math.PI * 2;
+          sparks.push({ x: pickup.x, y: pickup.y, vx: Math.cos(angle) * rand(30, 160), vy: Math.sin(angle) * rand(30, 160), life: rand(0.2, 0.6), color: '#5fe0ff' });
+        }
+      }
+    }
+
+    for (const spark of sparks) {
+      spark.x += spark.vx * dt; spark.y += spark.vy * dt; spark.vx *= 0.94; spark.vy *= 0.94; spark.life -= dt;
+    }
+    sparks = sparks.filter((spark) => spark.life > 0);
+
+    distanceEl.textContent = Math.round(state.distance) + ' m';
+    speedEl.textContent = Math.round(state.speed * 0.42);
+    scoreEl.textContent = Math.round(state.score);
+  }
+
+  function drawCar(x, y, w, h, color, isPlayer) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = color; ctx.shadowBlur = isPlayer ? 26 : 16;
+    const body = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+    body.addColorStop(0, color); body.addColorStop(1, 'rgba(10,4,20,.95)');
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.roundRect(-w / 2, -h / 2, w, h, w * 0.28);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(8,3,16,.78)';
+    ctx.beginPath(); ctx.roundRect(-w * 0.34, -h * 0.26, w * 0.68, h * 0.22, 4); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(-w * 0.34, h * 0.06, w * 0.68, h * 0.16, 4); ctx.fill();
+    ctx.fillStyle = isPlayer ? '#b8fff4' : '#ffe9ff';
+    ctx.fillRect(-w * 0.42, -h / 2 - 2, w * 0.84, 3);
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.save();
+    if (state.shake > 0) ctx.translate(rand(-1, 1) * state.shake * 10, rand(-1, 1) * state.shake * 10);
+
+    ctx.fillStyle = '#07030d';
+    ctx.fillRect(0, 0, W, H);
+
+    const asphalt = ctx.createLinearGradient(roadLeft, 0, roadLeft + roadWidth, 0);
+    asphalt.addColorStop(0, '#150a24'); asphalt.addColorStop(0.5, '#1d0f30'); asphalt.addColorStop(1, '#150a24');
+    ctx.fillStyle = asphalt;
+    ctx.fillRect(roadLeft, 0, roadWidth, H);
+
+    ctx.strokeStyle = 'rgba(255,95,210,.75)';
+    ctx.lineWidth = 3; ctx.shadowColor = '#ff5fd2'; ctx.shadowBlur = 22;
+    ctx.beginPath(); ctx.moveTo(roadLeft, 0); ctx.lineTo(roadLeft, H); ctx.stroke();
+    ctx.strokeStyle = 'rgba(95,224,255,.75)'; ctx.shadowColor = '#5fe0ff';
+    ctx.beginPath(); ctx.moveTo(roadLeft + roadWidth, 0); ctx.lineTo(roadLeft + roadWidth, H); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+
+    const offset = (state.time * state.speed * 1.5) % 90;
+    ctx.strokeStyle = 'rgba(255,255,255,.22)';
+    for (const lane of [1, 2]) {
+      const x = roadLeft + laneWidth * lane;
+      for (let y = -90 + offset; y < H; y += 90) {
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 44); ctx.stroke();
+      }
+    }
+
+    ctx.strokeStyle = 'rgba(255,120,240,.16)';
+    for (const streak of streaks) {
+      ctx.beginPath(); ctx.moveTo(streak.x, streak.y); ctx.lineTo(streak.x, streak.y + streak.len); ctx.stroke();
+    }
+
+    for (const pickup of pickups) {
+      ctx.save();
+      ctx.translate(pickup.x, pickup.y);
+      ctx.rotate(pickup.spin);
+      ctx.shadowColor = '#5fe0ff'; ctx.shadowBlur = 20;
+      ctx.strokeStyle = '#9ff6ff'; ctx.lineWidth = 3;
+      ctx.strokeRect(-pickup.r * 0.55, -pickup.r * 0.85, pickup.r * 1.1, pickup.r * 1.7);
+      ctx.fillStyle = 'rgba(95,224,255,.35)';
+      ctx.fillRect(-pickup.r * 0.55, -pickup.r * 0.85, pickup.r * 1.1, pickup.r * 1.7);
+      ctx.restore();
+    }
+
+    for (const car of traffic) drawCar(car.x, car.y, car.w, car.h, car.color, false);
+
+    if (state.mode === 'playing' || state.mode === 'over') {
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.rotate(player.tilt);
+      drawCar(0, 0, player.w, player.h, '#39f5d6', true);
+      ctx.restore();
+    }
+
+    for (const spark of sparks) {
+      ctx.globalAlpha = Math.max(0, Math.min(1, spark.life * 2.2));
+      ctx.fillStyle = spark.color;
+      ctx.fillRect(spark.x, spark.y, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+
+    if (state.speed > 0 && state.mode === 'playing') {
+      const vignette = ctx.createRadialGradient(W / 2, H * 0.55, H * 0.2, W / 2, H * 0.55, H * 0.95);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,.62)');
+      ctx.fillStyle = vignette; ctx.fillRect(0, 0, W, H);
+    }
+    if (state.flash > 0) {
+      ctx.fillStyle = `rgba(255,120,220,${state.flash * 0.5})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowLeft', 'ArrowRight', 'a', 'd', ' '].includes(event.key)) event.preventDefault();
+    if (event.key === 'ArrowLeft' || event.key === 'a') moveLane(-1);
+    if (event.key === 'ArrowRight' || event.key === 'd') moveLane(1);
+    if ((event.key === ' ' || event.key === 'Enter') && state.mode !== 'playing') start();
+  });
+  let pointerStart = null;
+  canvas.addEventListener('pointerdown', (event) => {
+    if (state.mode !== 'playing') { start(); return; }
+    pointerStart = { x: event.clientX, lane: player.lane };
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    if (!pointerStart || state.mode !== 'playing') return;
+    const delta = event.clientX - pointerStart.x;
+    const steps = Math.round(delta / (laneWidth * 0.55));
+    const next = clamp(pointerStart.lane + steps, 0, 2);
+    if (next !== player.lane) { player.tilt = Math.sign(next - player.lane) * 0.5; player.lane = next; }
+  });
+  canvas.addEventListener('pointerup', () => { pointerStart = null; });
+  action.addEventListener('click', start);
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

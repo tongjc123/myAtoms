@@ -1,0 +1,28 @@
+{
+  "id": "s3-slides",
+  "name": "s3-slides",
+  "title": "S3 slide generation and export",
+  "description": "Outline approval, versioned slide editing, online player, editable PPTX and PDF; depends on S2.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P0",
+  "creator": "admin",
+  "assignee": "admin",
+  "createdAt": "2026-11-12",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "11-15-s1-slides-workbench"
+  ],
+  "parent": "11-12-atoms-demo-v3",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

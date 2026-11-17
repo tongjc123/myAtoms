@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>霓虹方块</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0716; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; color: #f2e9ff; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .hud { position: fixed; inset: 16px 20px auto 20px; display: flex; align-items: flex-start; gap: 28px; pointer-events: none; }
+  .hud span { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: #8d76b8; }
+  .hud b { display: block; font-size: 26px; color: #f2e9ff; font-variant-numeric: tabular-nums; }
+  .hud .right { margin-left: auto; text-align: right; }
+  .overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 42%, rgba(52,20,84,.5), rgba(6,3,14,.93)); }
+  .overlay[hidden] { display: none; }
+  .panel { width: min(520px, 100%); text-align: center; }
+  .kicker { font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: #a789e0; }
+  h1 { margin: 10px 0 6px; font-size: clamp(30px, 6vw, 46px); letter-spacing: .1em; font-weight: 800;
+       background: linear-gradient(180deg, #ffffff, #b6a2ff 50%, #ff8ee0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { margin: 0 0 22px; font-size: 14px; color: #b8a4d8; letter-spacing: .06em; }
+  .keys { display: grid; gap: 8px; margin: 0 auto 24px; max-width: 360px; font-size: 13px; color: #b8a4d8; }
+  .keys div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #281842; padding-bottom: 6px; }
+  kbd { font: inherit; padding: 2px 8px; border-radius: 5px; background: #180f28; border: 1px solid #33204d; color: #ecdcff; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 999px; padding: 13px 34px; font-weight: 600; letter-spacing: .08em;
+           background: linear-gradient(135deg, #b6a2ff, #ff8ee0); color: #1a0a26; box-shadow: 0 10px 30px rgba(182,162,255,.28); }
+  button:hover { filter: brightness(1.08); }
+  button:focus-visible { outline: 2px solid #e6d4ff; outline-offset: 3px; }
+  .score-line { margin: 0 0 18px; font-size: 13px; color: #b8a4d8; }
+  .score-line strong { display: block; margin-top: 4px; font-size: 42px; color: #f2e9ff; font-variant-numeric: tabular-nums; }
+  .hint { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 11px; letter-spacing: .18em; color: #3c2c5c; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="hud">
+  <div><span>得分</span><b id="score">0</b></div>
+  <div><span>最大方块</span><b id="bestTile">2</b></div>
+  <div class="right"><span>步数</span><b id="moves">0</b></div>
+</div>
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <p class="kicker">Neon 2048</p>
+    <h1>霓虹方块</h1>
+    <p class="tagline" id="tagline">相同数字碰撞合并，目标 2048。</p>
+    <div class="score-line" id="scoreLine" hidden>本局得分<strong id="finalScore">0</strong></div>
+    <div class="keys" id="keys">
+      <div><span>移动方块</span><span><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+      <div><span>触屏</span><span>向任意方向滑动</span></div>
+      <div><span>目标</span><span>合成 2048 方块</span></div>
+    </div>
+    <button id="action">开始合成</button>
+  </div>
+</div>
+<div class="hint">霓虹方块 · 平台自研示例</div>
+<script>
+(function () {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const action = document.getElementById('action');
+  const scoreEl = document.getElementById('score');
+  const bestTileEl = document.getElementById('bestTile');
+  const movesEl = document.getElementById('moves');
+  const taglineEl = document.getElementById('tagline');
+  const scoreLine = document.getElementById('scoreLine');
+  const finalScore = document.getElementById('finalScore');
+  const keysPanel = document.getElementById('keys');
+
+  const SIZE = 4;
+  const palette = {
+    2: ['#2b2440', '#cfc4ff'], 4: ['#352a52', '#d9ccff'], 8: ['#3f3170', '#ffffff'],
+    16: ['#5b3a92', '#ffffff'], 32: ['#8a3fb0', '#ffffff'], 64: ['#c246a8', '#ffffff'],
+    128: ['#ff5fa2', '#2b0620'], 256: ['#ff8a6b', '#2b0b06'], 512: ['#ffc95f', '#2b1c02'],
+    1024: ['#7ce7c5', '#04231b'], 2048: ['#5fe0ff', '#04202b'],
+  };
+
+  let W = 0, H = 0, DPR = 1, board = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => null)), boardSize = 0, boardX = 0, boardY = 0, cell = 0, gap = 0;
+  const state = { mode: 'title', score: 0, moves: 0, best: 2, keepGoing: false, time: 0, popTile: null };
+  const tiles = [];
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    boardSize = Math.min(W * 0.86, H * 0.7);
+    gap = boardSize * 0.032;
+    cell = (boardSize - gap * (SIZE + 1)) / SIZE;
+    boardX = (W - boardSize) / 2;
+    boardY = (H - boardSize) / 2 + Math.min(30, H * 0.04);
+  }
+
+  function emptyBoard() {
+    return Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => null));
+  }
+
+  function forEachTile(visit) {
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        if (board[row][col] !== null) visit(board[row][col], row, col);
+      }
+    }
+  }
+
+  function spawn() {
+    const free = [];
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) if (board[row][col] === null) free.push([row, col]);
+    }
+    if (!free.length) return;
+    const [row, col] = free[Math.floor(Math.random() * free.length)];
+    const value = Math.random() < 0.88 ? 2 : 4;
+    board[row][col] = { value, born: 0 };
+    state.popTile = { row, col };
+    if (value > state.best) state.best = value;
+    bestTileEl.textContent = state.best;
+  }
+
+  function reset() {
+    board = emptyBoard();
+    state.score = 0; state.moves = 0; state.best = 2; state.keepGoing = false; state.time = 0; state.popTile = null;
+    spawn(); spawn();
+    scoreEl.textContent = '0'; movesEl.textContent = '0'; bestTileEl.textContent = '2';
+  }
+
+  function start() { reset(); state.mode = 'playing'; overlay.hidden = true; }
+
+  function overlayGameOver(win) {
+    state.mode = 'over';
+    overlay.hidden = false;
+    taglineEl.textContent = win ? '已经合成 2048 了，还想更高吗？' : '没有可以移动的方向了。再来一局。';
+    scoreLine.hidden = false;
+    finalScore.textContent = state.score;
+    keysPanel.hidden = true;
+    action.textContent = '再来一局';
+  }
+
+  function lineValues(get, set, length) {
+    const values = [];
+    for (let index = 0; index < length; index++) values.push(get(index));
+    const compact = values.filter((value) => value !== null);
+    const merged = [];
+    let gained = 0;
+    for (let index = 0; index < compact.length; index++) {
+      const tile = compact[index];
+      if (index + 1 < compact.length && compact[index + 1].value === tile.value) {
+        const value = tile.value * 2;
+        gained += value;
+        merged.push({ value, born: -1 });
+        index += 1;
+      } else {
+        merged.push({ value: tile.value, born: tile.born === 0 ? 0.4 : -1 });
+      }
+    }
+    const changed = merged.length !== compact.length;
+    while (merged.length < length) merged.push(null);
+    for (let index = 0; index < length; index++) set(index, merged[index]);
+    return { gained, changed };
+  }
+
+  function move(direction) {
+    if (state.mode !== 'playing') return;
+    let moved = false, gained = 0;
+    const lines = [];
+    for (let index = 0; index < SIZE; index++) {
+      if (direction === 'left' || direction === 'right') {
+        const row = index;
+        const cells = direction === 'left'
+          ? Array.from({ length: SIZE }, (_, col) => col)
+          : Array.from({ length: SIZE }, (_, col) => SIZE - 1 - col);
+        lines.push({
+          get: (offset) => board[row][cells[offset]],
+          set: (offset, value) => { board[row][cells[offset]] = value; },
+        });
+      } else {
+        const col = index;
+        const cells = direction === 'up'
+          ? Array.from({ length: SIZE }, (_, row) => row)
+          : Array.from({ length: SIZE }, (_, row) => SIZE - 1 - row);
+        lines.push({
+          get: (offset) => board[cells[offset]][col],
+          set: (offset, value) => { board[cells[offset]][col] = value; },
+        });
+      }
+    }
+    for (const line of lines) {
+      const before = JSON.stringify(Array.from({ length: SIZE }, (_, index) => line.get(index)?.value ?? null));
+      const result = lineValues(line.get, line.set, SIZE);
+      const after = JSON.stringify(Array.from({ length: SIZE }, (_, index) => line.get(index)?.value ?? null));
+      if (before !== after || result.changed) moved = true;
+      gained += result.gained;
+    }
+    if (!moved) return;
+
+    state.moves += 1;
+    movesEl.textContent = state.moves;
+    if (gained > 0) {
+      state.score += gained;
+      scoreEl.textContent = state.score;
+    }
+    forEachTile((tile) => { if (tile.value > state.best) state.best = tile.value; });
+    bestTileEl.textContent = state.best;
+    spawn();
+
+    if (!state.keepGoing && state.best >= 2048) {
+      state.keepGoing = true;
+      state.mode = 'won';
+      overlay.hidden = false;
+      taglineEl.textContent = '合成 2048 成功。可以继续冲更高分。';
+      scoreLine.hidden = true;
+      keysPanel.hidden = true;
+      action.textContent = '继续挑战';
+      action.dataset.continue = '1';
+    } else if (!hasMoves()) {
+      overlayGameOver(false);
+    }
+  }
+
+  function hasMoves() {
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const value = board[row][col];
+        if (value === null) return true;
+        if (col + 1 < SIZE && board[row][col + 1] !== null && board[row][col + 1].value === value.value) return true;
+        if (row + 1 < SIZE && board[row + 1][col] !== null && board[row + 1][col].value === value.value) return true;
+      }
+    }
+    return false;
+  }
+
+  function update(dt) {
+    state.time += dt;
+    if (state.popTile) {
+      const tile = board[state.popTile.row][state.popTile.col];
+      if (tile && tile.born >= 0) tile.born = Math.min(1, tile.born + dt * 4);
+      if (!tile || tile.born >= 1) state.popTile = null;
+    }
+  }
+
+  function draw() {
+    const background = ctx.createLinearGradient(0, 0, W, H);
+    background.addColorStop(0, '#0b0716'); background.addColorStop(1, '#140a24');
+    ctx.fillStyle = background; ctx.fillRect(0, 0, W, H);
+
+    const halo = ctx.createRadialGradient(W / 2, boardY + boardSize / 2, 0, W / 2, boardY + boardSize / 2, boardSize);
+    halo.addColorStop(0, 'rgba(150,110,255,.14)'); halo.addColorStop(1, 'rgba(11,7,22,0)');
+    ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(24,15,40,.9)';
+    ctx.strokeStyle = 'rgba(150,120,255,.22)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(boardX, boardY, boardSize, boardSize, boardSize * 0.035); ctx.fill(); ctx.stroke();
+
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const x = boardX + gap + col * (cell + gap);
+        const y = boardY + gap + row * (cell + gap);
+        const tile = board[row][col];
+        if (tile === null) {
+          ctx.fillStyle = 'rgba(255,255,255,.035)';
+          ctx.beginPath(); ctx.roundRect(x, y, cell, cell, cell * 0.16); ctx.fill();
+          continue;
+        }
+        const [fill, text] = palette[tile.value] || ['#7b5bff', '#ffffff'];
+        const scale = tile.born >= 0 ? 0.65 + 0.35 * tile.born : 1;
+        const size = cell * scale;
+        const offset = (cell - size) / 2;
+        ctx.save();
+        ctx.shadowColor = fill; ctx.shadowBlur = tile.value >= 128 ? 26 : 12;
+        ctx.fillStyle = fill;
+        ctx.beginPath(); ctx.roundRect(x + offset, y + offset, size, size, size * 0.16); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = text;
+        const digits = String(tile.value).length;
+        const fontSize = cell * (digits > 3 ? 0.3 : digits === 3 ? 0.34 : 0.4);
+        ctx.font = `700 ${fontSize}px "PingFang SC", "Microsoft YaHei", system-ui, sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(tile.value), x + cell / 2, y + cell / 2 + fontSize * 0.04);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('keydown', (event) => {
+    const map = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', a: 'left', d: 'right', w: 'up', s: 'down' };
+    const direction = map[event.key.length === 1 ? event.key.toLowerCase() : event.key];
+    if (direction) { event.preventDefault(); move(direction); return; }
+    if ((event.key === ' ' || event.key === 'Enter') && state.mode !== 'playing') {
+      if (action.dataset.continue === '1') { action.dataset.continue = ''; state.mode = 'playing'; overlay.hidden = true; return; }
+      start();
+    }
+  });
+
+  let swipe = null;
+  canvas.addEventListener('pointerdown', (event) => {
+    if (state.mode !== 'playing') return;
+    swipe = { x: event.clientX, y: event.clientY };
+  });
+  canvas.addEventListener('pointerup', (event) => {
+    if (!swipe || state.mode !== 'playing') { swipe = null; return; }
+    const dx = event.clientX - swipe.x, dy = event.clientY - swipe.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) > 24) {
+      move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+    }
+    swipe = null;
+  });
+  action.addEventListener('click', () => {
+    if (action.dataset.continue === '1') {
+      action.dataset.continue = '';
+      state.mode = 'playing';
+      overlay.hidden = true;
+      return;
+    }
+    start();
+  });
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

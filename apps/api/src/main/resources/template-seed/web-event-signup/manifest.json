@@ -1,0 +1,13 @@
+{
+  "slug": "web-event-signup",
+  "name": "活动报名页",
+  "type": "WEB",
+  "category": "活动",
+  "summary": "深色海报感的活动单页，倒计时、日程、嘉宾与报名表单齐全。",
+  "description": "为线下沙龙、发布会或工作坊准备的单页：首屏用大字与实时倒计时建立紧迫感，中间是日程与嘉宾，结尾是可校验的报名表单。表单默认只做本地校验与结果预览，接入后端时替换提交逻辑即可。",
+  "author": "Atoms Demo 自研示例",
+  "license": "平台自研示例，可自由克隆修改",
+  "entry": "index.html",
+  "sortOrder": 12,
+  "files": ["index.html"]
+}

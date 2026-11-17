@@ -1,0 +1,4 @@
+{"file":".trellis/spec/project-contract.md","reason":"No false generation and no login"}
+{"file":"Atoms-Demo-产品需求文档.md","reason":"R01 R06 R12 R28 acceptance"}
+{"file":".trellis/spec/backend/index.md","reason":"Database and ownership checks"}
+{"file":".trellis/spec/frontend/index.md","reason":"Actual state and user-flow checks"}
