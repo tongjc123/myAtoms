@@ -3,6 +3,7 @@ import { asApiError } from '../../api/http'
 import type { ApiError } from '../../api/http'
 import { createProject } from '../../api/projects'
 import { startVideoRun } from '../../api/runs'
+import { randomUuid } from '../../api/uuid'
 import { VideoSettings } from './VideoSettings'
 import type { VideoOptions, VideoSpec } from '../../api/videos'
 import { Icon } from '../../components/Icon'
@@ -35,7 +36,7 @@ export function VideoComposer({ enabled, options, spec, onSpecChange, prompt, on
         prompt: prompt.trim(),
         type: 'VIDEO',
         mode: 'BUILD',
-      }, crypto.randomUUID(), controller.signal)
+      }, randomUuid(), controller.signal)
       await startVideoRun(project.id, {
         model: spec.model, ratio: spec.ratio, resolution: spec.resolution,
         durationSeconds: spec.durationSeconds,

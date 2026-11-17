@@ -4,6 +4,7 @@ import { asApiError } from '../../api/http'
 import type { ApiError } from '../../api/http'
 import { createProject } from '../../api/projects'
 import { startSlidesRun } from '../../api/runs'
+import { randomUuid } from '../../api/uuid'
 import type { TemplateItem } from '../../api/templates'
 import { Icon } from '../../components/Icon'
 import { openChat } from '../projects/navigation'
@@ -81,7 +82,7 @@ export function SlideComposer({ enabled, selection, onClear, onReconnect }: {
         prompt: prompt.trim(),
         type: 'SLIDES',
         mode: 'BUILD',
-      }, crypto.randomUUID(), controller.signal)
+      }, randomUuid(), controller.signal)
       await startSlidesRun(project.id, {
         templateSlug: selection?.kind === 'template' ? selection.item.slug : null,
         importId: selection?.kind === 'import' ? selection.item.id : null,

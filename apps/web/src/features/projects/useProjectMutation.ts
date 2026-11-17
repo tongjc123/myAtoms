@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { asApiError } from '../../api/http'
 import type { ApiError } from '../../api/http'
+import { randomUuid } from '../../api/uuid'
 
 export function useProjectMutation() {
   const [busy, setBusy] = useState(false)
@@ -30,7 +31,7 @@ export function useProjectMutation() {
     setError(undefined)
     try {
       if (receipt.current?.intent !== intent) {
-        receipt.current = { intent, key: crypto.randomUUID() }
+        receipt.current = { intent, key: randomUuid() }
       }
       const result = await operation(receipt.current.key, controller.signal)
       if (!mounted.current || controller.signal.aborted) return

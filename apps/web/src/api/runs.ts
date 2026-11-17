@@ -1,5 +1,6 @@
 import { ApiError, invalidResponse, isRecord, isUtcDate, isUuid, requestJson } from './http'
 import { ensureSession, invalidateSession } from './session'
+import { randomUuid } from './uuid'
 
 export type RunStatus = 'QUEUED' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED'
 
@@ -204,7 +205,7 @@ export async function startRun(
   projectId: string,
   payload: StartRunInput,
   signal: AbortSignal,
-  idempotencyKey: string = crypto.randomUUID(),
+  idempotencyKey: string = randomUuid(),
 ): Promise<{ runId: string }> {
   signal.throwIfAborted()
   const session = await ensureSession()
